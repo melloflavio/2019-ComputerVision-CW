@@ -1,3 +1,7 @@
+Dataset/*
+
+
+## LaTeX Sample Gitignore
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
