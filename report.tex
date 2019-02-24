@@ -12,7 +12,6 @@
 \usepackage{graphics}
 
 
-
 \title{Title of my document}
 % \date{2019-0}
 \author{Flavio R. de A. F. Mello}
@@ -30,8 +29,12 @@
 \section{Preprocessing}
 
 \subsection{File Format Normalization}
-Part o
+A common issue when dealing with data science tasks is data formatting. Data is often stored in multiple different formats and schemas, regularly creating the need for normalizing the input before proceeding with the analysis. Computer vision is not free of such trappings. Considering just some of the more ostensibly used formats, there are at least 5 different image extensions (\textit{jpg, bmp, png, tiff, and gif}) and 5 video extensions (\textit{mp4, avi, mov, wmv, flv}). These numbers are increased when taking into account lesser known, and sometimes not open, formats. Considering different tools provide different level of support for each format, it is of interest to tackle this issue early on in the analysis pipeline, ensuring data flows seamlessly throughout the process. Luckily, given how pervasive this format plurality is, there is no shortage of tools available that can convert between the different file extensions.
+
 \subsubsection{Image Files Conversion}
+For the task at hand, there are 2 different image formats present in the data: \textit{jpg} and \textit{heic}. \textit{Jpg}, or \textit{jpeg}, is a longstanding open format with ample support in most ecosystems, while \textit{heic}, or \textit{heif}, is a newer format proposed as an alternative to \textit{jpg} being able to achieve higher compression. Most notably, it became the standard photo format on iOS 11. Given that the platform being used for the analysis (Matlab) provides support for \textit{jpg}, but not for \textit{heic}, it was decided to convert all the \textit{heic} files in the dataset provided into \textit{jpg}. This was done using the open source tool ImageMagick, which provides support for display and manipulation for multiple image formats. Additionally, the tool is available in all major ecosystems both desktop (Windows, OSX and Linux) and mobile (iOS and Android). Using windows, this can be done with a single line in the command prompt:
+
+\texttt{mogrify  -format jpg   *.heic}
 
 \subsubsection{Video Files Conversion}
 
