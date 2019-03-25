@@ -1,0 +1,22 @@
+function [faces] = ExtractFaces(imgPath)
+%EXTRACTFACES Extracts all faces from single image and outputs them as
+%individual image files at the destination folder
+%% Read image
+    imgObj = imread(imgPath);
+
+%% Detect Faces
+    faceDetector = vision.CascadeObjectDetector('ClassificationModel','FrontalFaceCART');
+    boundingBoxes = faceDetector(imgObj);
+
+%% Crop & sxport faces as a cell array
+    faceCount = size(boundingBoxes,1);
+    faces = cell(faceCount);
+    for bboxIdx = 1:faceCount
+        boundingBox = boundingBoxes(bboxIdx, :);
+        croppedFace = imcrop(imgObj, boundingBox);
+        faces{bboxIdx} = croppedFace;
+    end
+    
+    
+end
+

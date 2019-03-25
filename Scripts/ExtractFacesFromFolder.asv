@@ -1,0 +1,63 @@
+% function [] = ExtractFacesFromFolder(inFolder, outFolder)
+% %EXTRACTFACESFROMFOLDER Summary of this function goes here
+% %   Detailed explanation goes here
+% 
+% 
+% 
+% end
+
+%% Dev
+inFolder =  "..\Dataset\processed\1\individual_mov";
+outFolder =  "..\Dataset\processed_2\1\individual_mov";
+
+
+
+%
+allImages = dir(fullfile(inFolder, "*.jpg")); % Get images from inFolder
+mkdir(outFolder); % Ensure outfolder exis
+
+%% Iterate over images extracting & saving faces
+for imageIdx = 1:size(allImages,1)
+    % Get path components
+    imageFolder = allImages(imageIdx).folder;
+    imageName = allImages(imageIdx).name;
+    imagePath = fullfile(imageFolder, imageName);
+    [~, imageNamePlain, ~] = fileparts(imagePath); % Get name without extension
+    % Extract faces
+    faces = ExtractFaces(imagePath);
+    
+    % Save Faces to destination folder
+    for faceIdx = 1:size(faces,1)
+        faceImg = faces{faceIdx};
+        outFilename = strcat(imageNamePlain, "__f_", int2str(faceIdx), ".jpg");
+        outFilepath = fullfile(outFolder, outFilename);
+        imwrite(faceImg, outFilepath);
+    end
+end
+
+% function [faces] = ExtractFaces(imgPath, outFolder)
+% %EXTRACTFACES Extracts all faces from single image and outputs them as
+% %individual image files at the destination folder
+% %% Read image
+%     [~, imgname, ~] = fileparts(imgPath);
+%     imgObj = imread(imgPath);
+% 
+% %% Detect Faces
+%     faceDetector = vision.CascadeObjectDetector('ClassificationModel','FrontalFaceCART');
+%     boundingBoxes = faceDetector(imgObj);
+% 
+% %% Export faces as individual files
+%     faceCount = size(boundingBoxes,1);
+%     faces = cell(faceCount);
+%     for bboxIdx = 1:faceCount
+%         boundingBox = boundingBoxes(bboxIdx, :);
+%         croppedFace = imcrop(imgObj, boundingBox);
+%         faces{bboxIdx} = croppedFace;
+% %         outFilename = strcat(imgname, "_", int2str(bboxIdx), ".jpg");
+% %         outFilepath = fullfile(outFolder, outFilename);
+% %         imwrite(croppedFace, outFilepath);
+%     end
+%     
+%     
+% end
+% 
