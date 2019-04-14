@@ -5,9 +5,7 @@ picFolderName = "individual_pic";
 movieFolderName = "individual_mov";
 
 %% Get all folders representing each individual
-contents = dir(inputBasepath);
-folders = {contents([contents.isdir]).name}; % Get only names of dirs
-folders = setdiff(folders , {'.', '..'});  % Remove . and .. folder links
+folders = ListSubfolders(inputBasepath);
 
 %% Iterate over individual people folders extracting faces
 for folderIdx = 1:size(folders,2)

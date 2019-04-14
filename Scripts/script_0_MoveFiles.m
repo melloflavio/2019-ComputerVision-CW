@@ -4,10 +4,7 @@ picFolderName = "individual_pic";
 movieFolderName = "individual_mov";
 
 %% Get all folders
-contents = dir(basepath)
-folders = {contents([contents.isdir]).name}; % Get only names of dirs
-folders = setdiff(folders , {'.', '..'});  % Remove . and .. folder links
-
+folders = ListSubfolders(basepath);
 
 %% Loop Through all folder
 for folderIdx = 1:size(folders,2)
