@@ -11,12 +11,15 @@ folders = setdiff(folders , {'.', '..'});  % Remove . and .. folder links
 
 %% Loop Through all folder
 for folderIdx = 1:size(folders,2)
-    % Solve
+    
+    % Resolve paths
     folderName = folders{folderIdx};
     movieFolder = fullfile(basepath, folderName, movieFolderName);
     picFolder = fullfile(basepath, folderName, picFolderName);
     
-    % Move movie files files
+    fprintf('Processing folder: %s \n', folderName);
+    
+    % Move movie files
     try
         movefile(fullfile(basepath, folderName, "*.mov"), movieFolder);
     end
@@ -24,7 +27,7 @@ for folderIdx = 1:size(folders,2)
         movefile(fullfile(basepath, folderName, "*.mp4"), movieFolder)
     end
     
-    % Move movie files files
+    % Move picture files
     try
         movefile(fullfile(basepath, folderName, "*.jpeg"), picFolder);
     end
