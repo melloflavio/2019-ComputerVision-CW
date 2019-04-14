@@ -3,6 +3,8 @@ Dataset/*
 ## Custom
 # Matlab
 *.asv
+# Sandbox used for testing code excerpts
+test.m
 
 ## LaTeX Sample Gitignore
 ## Core latex/pdflatex auxiliary files:
