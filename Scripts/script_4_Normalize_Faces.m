@@ -9,9 +9,9 @@ groupPicFolderName = "group_pic";
 groupMovFolderName = "group_mov";
 
 %% Normalization Feature Toggle
-shouldAlignEyes = true;
-shouldConvertToGrayscale = false;
-shouldResizeImages = false;
+shouldAlignEyes = false;
+shouldConvertToGrayscale = true;
+shouldResizeImages = true;
 outputImageSize = [256, 256];
 resizeInterpolationMethod = 'bicubic';
 
