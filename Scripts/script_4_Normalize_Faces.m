@@ -4,13 +4,6 @@ outputFolder = "processed_5";
 inputBasepath = fullfile("../Dataset", inputFolder);
 outputBasepath= fullfile("../Dataset", outputFolder);
 
-%% Normalization Feature Toggle
-shouldAlignEyes = false;
-shouldConvertToGrayscale = true;
-shouldResizeImages = true;
-outputImageSize = [256, 256];
-resizeInterpolationMethod = 'bicubic';
-
 %% Create Normalized Image Set Collection with ann individuals pictures
 disp("Building ImageSet Collection...");
 imgSetCollection = CreateNormalizedImageSetCollection(inputBasepath);

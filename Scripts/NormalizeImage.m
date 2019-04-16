@@ -6,7 +6,7 @@ function [normalizedImage] = NormalizeImage(originalImage)
 shouldAlignEyes = false;
 shouldConvertToGrayscale = true;
 shouldResizeImages = true;
-outputImageSize = [256, 256];
+outputImageSize = [224, 224];
 resizeInterpolationMethod = 'bicubic';
 
     %% Start with original image
