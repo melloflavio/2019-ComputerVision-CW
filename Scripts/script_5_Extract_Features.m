@@ -5,7 +5,8 @@ inputBasepath = "../Dataset\processed_5";
 imgSetCollection = CreateNormalizedImageSetCollection(inputBasepath);
 
 %% Extract SURF features
-surfFeatures = bagOfFeatures(imgSetCollection);
+surfBag = bagOfFeatures(imgSetCollection);
+
 
 %% Extract HOG features
 hogCellSize = [8 8];
