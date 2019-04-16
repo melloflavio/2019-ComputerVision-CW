@@ -13,7 +13,7 @@ function [faces] = ExtractFaces(imgPath)
     faces = cell(faceCount);
     for bboxIdx = 1:faceCount
         boundingBox = boundingBoxes(bboxIdx, :);
-        croppedFace = imcrop(imgObj, boundingBox);
+        croppedFace = CropFace(imgObj, boundingBox);
         faces{bboxIdx} = croppedFace;
     end
     
