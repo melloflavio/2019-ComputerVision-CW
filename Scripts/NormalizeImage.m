@@ -4,9 +4,9 @@ function [normalizedImage] = NormalizeImage(originalImage)
 %   Detailed explanation goes here
 %% Feature Toggle & Settings
 shouldAlignEyes = false;
-shouldConvertToGrayscale = true;
+shouldConvertToGrayscale = false;
 shouldResizeImages = true;
-outputImageSize = [224, 224];
+outputImageSize = [227, 227];
 resizeInterpolationMethod = 'bicubic';
 
     %% Start with original image
