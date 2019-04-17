@@ -161,6 +161,7 @@ for ocrIdx = 1:size(ocrtxt, 1)
     ocrTxt = ocrElem.Text;
     ocrTxt = strtrim(ocrTxt); % Trim whitespace
     [ocrNums, success] = str2num(ocrTxt); % Convert to number array
+    
     % Even if string parse to number was successful, multiple errors may
     % still happen. The parsed values might not be integers at al, as 
     % matlab does not have parse to int, only parse to number :(. Also, OCR
@@ -187,7 +188,7 @@ for ocrIdx = 1:size(ocrtxt, 1)
         
         % If number is valid, consider it as a found candidate, store in
         % found numbers list alog with index to map to original OCR
-        % bounding boxes
+        % bounding boxes, if desired
         if (isInteger)
             foundNumbersIdxs = [foundNumbersIdxs, ocrIdx];
             foundNumbers = [foundNumbers, numberValue];

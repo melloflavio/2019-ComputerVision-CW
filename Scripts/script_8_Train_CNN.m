@@ -12,11 +12,11 @@ numClasses = numel(categories(imgDatastore.Labels));
 %% Setup Neural Network
 
 % Based on Slides on Lecture 07
-net = alexnet; % Load Pretrained Network
+alexNet = alexnet; % Load Pretrained Network
 % Keep only initial layers regarding with pretrained features / remove last
 % section which is domain specific and does the classification based on
 % features learned/extracted in initial layers
-layersTransfer = net.Layers(1:end-3);
+layersTransfer = alexNet.Layers(1:end-3);
 layers = [
     layersTransfer
     fullyConnectedLayer(numClasses,'WeightLearnRateFactor',20,'BiasLearnRateFactor',20)
@@ -37,4 +37,17 @@ options = trainingOptions( ...
 );
 
 %% Train Neural Network
-netTransfer = trainNetwork(trainingImages,layers,options);
+
+faceNet = trainNetwork(trainingImages,layers,options);
+
+%% Test Accuracy
+
+predictedLabels = classify(faceNet, validationImages);
+
+confusionMatrix = confusionmat(validationImages.Labels, predictedLabels);
+accuracy = sum(validationImages.Labels == predictedLabels)/size(validationImages.Labels, 1);
+fprintf('Accuracy: %d\n', accuracy);
+
+%% Save Neural Network
+
+save("faceNet", 'faceNet');
