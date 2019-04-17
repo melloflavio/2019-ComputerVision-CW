@@ -1,30 +1,24 @@
-% Baed on Matlab tutorial on recognizing text regions in natural images
+% Based on Matlab tutorial on recognizing text regions in natural images
 % https://uk.mathworks.com/help/vision/examples/automatically-detect-and-recognize-text-in-natural-images.html
 
 %% Step 1
-colorImage = imread('../Dataset/processed/1/individual_pic/IMG_20190128_201734.jpg');
-I = rgb2gray(colorImage);
+% colorImage = imread('../Dataset/processed/1/individual_pic/IMG_20190128_201734.jpg');
+colorImage = imread('../Dataset/processed/65/individual_pic/IMG_20190128_202419.jpg');
+% colorImage = imread('../Dataset/processed/65/individual_pic/IMG_20190128_202423.jpg');
 
-% I = imbinarize(rgb2gray(colorImage));
-% I = imdilate(I, strel('disk',6));
+I = rgb2gray(colorImage); % Convert to grayscale
 
 % Detect MSER regions.
 [mserRegions, mserConnComp] = detectMSERFeatures(I, ... 
-    'RegionAreaRange',[200 8000],'ThresholdDelta',4);
-
-figure
-imshow(I)
-hold on
-plot(mserRegions, 'showPixelList', true,'showEllipses',false)
-title('MSER regions')
-hold off
+    'RegionAreaRange',[200 8000], ...
+    'ThresholdDelta',4);
 
 %% Step 2
 % Use regionprops to measure MSER properties
 mserStats = regionprops(mserConnComp, 'BoundingBox', 'Eccentricity', ...
     'Solidity', 'Extent', 'Euler', 'Image');
 
-% Compute the aspect ratio using bounding box data.
+% Compute the aspect ratio for all regions using bounding box data.
 bbox = vertcat(mserStats.BoundingBox);
 w = bbox(:,3);
 h = bbox(:,4);
@@ -38,62 +32,41 @@ filterIdx = filterIdx | [mserStats.Solidity] < .3;
 filterIdx = filterIdx | [mserStats.Extent] < 0.2 | [mserStats.Extent] > 0.9;
 filterIdx = filterIdx | [mserStats.EulerNumber] < -4;
 
-% Remove regions
+% Remove regions flagged by thresholds above
 mserStats(filterIdx) = [];
 mserRegions(filterIdx) = [];
 
-% Show remaining regions
-figure
-imshow(I)
-hold on
-plot(mserRegions, 'showPixelList', true,'showEllipses',false)
-title('After Removing Non-Text Regions Based On Geometric Properties')
-hold off
+%% Step 3 - Filter region list based on stroke width variation
+% In general, letters/digits then to have uniform stroke width. This is
+% partially true for the font used in the provided images, so the threshold
+% has to be a little higher, which fails to filter some non-text regions.
+% But it still manages to reduce the candidate regions while not removing
+% the target text region
 
-%% Step 3
-% Get a binary image of the a region, and pad it to avoid boundary effects
-% during the stroke width computation.
-regionImage = mserStats(6).Image;
-regionImage = padarray(regionImage, [1 1]);
+% Threshold tuned with test images from the provided images. Value is a
+% little higher than the default because the font used for printing the
+% numbers has some variation in stroke width in the curves.
+strokeWidthThreshold = 0.6; 
 
-% Compute the stroke width image.
-distanceImage = bwdist(~regionImage); 
-skeletonImage = bwmorph(regionImage, 'thin', inf);
-
-strokeWidthImage = distanceImage;
-strokeWidthImage(~skeletonImage) = 0;
-
-% Show the region image alongside the stroke width image. 
-figure
-subplot(1,2,1)
-imagesc(regionImage)
-title('Region Image')
-
-subplot(1,2,2)
-imagesc(strokeWidthImage)
-title('Stroke Width Image')
-
-% Compute the stroke width variation metric 
-strokeWidthValues = distanceImage(skeletonImage);   
-strokeWidthMetric = std(strokeWidthValues)/mean(strokeWidthValues);
-
-% Threshold the stroke width variation metric
-strokeWidthThreshold = 0.6;
-strokeWidthFilterIdx = strokeWidthMetric > strokeWidthThreshold;
-
-% Process the remaining regions
+% Process each region, filtering regions in which the stroke with variation
+% is larger than an established threshold
 for j = 1:numel(mserStats)
+    % during the stroke width computation.
+    regionImage = mserStats(j).Image; % Get a binary image of the a region
+    regionImage = padarray(regionImage, [1 1], 0); % Pad it to avoid any boundary effects
     
-    regionImage = mserStats(j).Image;
-    regionImage = padarray(regionImage, [1 1], 0);
-    
+    % Calculate a skeleton image representing the "core" of the stroke.
+    % Width (and width variation) is then calculated based on the distance
+    % between the image region and its equivalent skeleton stroke
     distanceImage = bwdist(~regionImage);
     skeletonImage = bwmorph(regionImage, 'thin', inf);
     
+    % Calculate variation in stroke width within the region
     strokeWidthValues = distanceImage(skeletonImage);
-    
     strokeWidthMetric = std(strokeWidthValues)/mean(strokeWidthValues);
     
+    % Flag for removal regions with stroke width variation larger than
+    % threshold
     strokeWidthFilterIdx(j) = strokeWidthMetric > strokeWidthThreshold;
     
 end
@@ -102,15 +75,8 @@ end
 mserRegions(strokeWidthFilterIdx) = [];
 mserStats(strokeWidthFilterIdx) = [];
 
-% Show remaining regions
-figure
-imshow(I)
-hold on
-plot(mserRegions, 'showPixelList', true,'showEllipses',false)
-title('After Removing Non-Text Regions Based On Stroke Width Variation')
-hold off
+%% Step 4 - Merge bounding boxes to find contiguous text regions
 
-%% Step 4
 % Get bounding boxes for all the regions
 bboxes = vertcat(mserStats.BoundingBox);
 
@@ -134,13 +100,8 @@ ymin = max(ymin, 1);
 xmax = min(xmax, size(I,2));
 ymax = min(ymax, size(I,1));
 
-% Show the expanded bounding boxes
+% Build bboxes matrix in [xmin ymin xmax ymax] format
 expandedBBoxes = [xmin ymin xmax-xmin+1 ymax-ymin+1];
-IExpandedBBoxes = insertShape(colorImage,'Rectangle',expandedBBoxes,'LineWidth',3);
-
-figure
-imshow(IExpandedBBoxes)
-title('Expanded Bounding Boxes Text')
 
 % Compute the overlap ratio
 overlapRatio = bboxOverlapRatio(expandedBBoxes, expandedBBoxes);
@@ -169,18 +130,29 @@ textBBoxes = [xmin ymin xmax-xmin+1 ymax-ymin+1];
 numRegionsInGroup = histcounts(componentIndices);
 textBBoxes(numRegionsInGroup == 1, :) = [];
 
-% Show the final text detection result.
-ITextRegion = insertShape(colorImage, 'Rectangle', textBBoxes(1,:),'LineWidth',3);
 
-figure
-imshow(ITextRegion)
-title('Detected Text')
+%% Step 5 - Perform OCR on all boxes
 
-%% Step 5 Perform OCR
+% Using TextLayout as a hint for OCR routine to look for individual words
+% instead of whole phrases. In the tests this helped identify better the
+% printed numbers. Matlab's OCR function accepts further hints in terms of
+% limiting the character set, after some tests with testing data, it was
+% decided not to use this capability as it didn't change much the true
+% positive, but tended to read as numbers noisy regions in the image. Since
+% the fact of only numbers being expected is used to our advantage in step
+% 6 to filter out noise interpreted as text.
 ocrtxt = ocr(I, textBBoxes, 'TextLayout','Word');
-[ocrtxt.Text]
+% [ocrtxt.Text]
 
-%% Perfom Validation
+%% Step 6 - Filter OCR results based on known constraints
+
+% At this stage we should have a reasonable accuracy in terms of finding 
+% candidate text regions found being able to extract text from them via
+% OCR. With the exception of some tuning in the stroke width variation, the
+% previous steps represent a general-use approach to extracting text from
+% natural images. This final stage in the process represents a final tuning
+% based on known constraints of the task at hand. That is, the text should
+% be a single integer number
 
 foundNumbersIdxs = [];
 foundNumbers = [];
@@ -202,8 +174,12 @@ for ocrIdx = 1:size(ocrtxt, 1)
             ocrDigit = ocrNums(ocrDigitIdx);
             isInteger = mod(ocrDigit, 1) == 0;
             if (isInteger) % Checks if is integer using remainder of division by 1
-                numberValue = numberValue * 10; % Shift accumulated number to the left
-                numberValue = numberValue + ocrDigit; % Introduces digit at units place
+                % Shift accumulated number to the left
+                orderOfMagnitude = round(ocrDigit / 10);
+                numberValue = numberValue * (10 * orderOfMagnitude);
+                
+                % Introduces text at least significant places
+                numberValue = numberValue + ocrDigit; 
             else % Non integer digit found, consider this number as incorrect or "noise"
                 break;
             end
@@ -218,4 +194,5 @@ for ocrIdx = 1:size(ocrtxt, 1)
         end
     end
 end
+
 [foundNumbers]
