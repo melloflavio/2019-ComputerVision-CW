@@ -56,4 +56,4 @@ fprintf('Accuracy: %d\n', accuracy);
 
 %% Save Neural Network
 
-save("./models/CNN", 'faceNet');
+save("../models/CNN", 'faceNet');
