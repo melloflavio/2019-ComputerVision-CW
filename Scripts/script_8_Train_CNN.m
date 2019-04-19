@@ -4,8 +4,14 @@ inputBasepath = "../Dataset\processed_6";
 %% Create Normalized Image Set Collection with ann individuals pictures
 imgDatastore = imageDatastore(inputBasepath, 'IncludeSubfolders',true, 'LabelSource','foldernames');
 numClasses = numel(categories(imgDatastore.Labels));
-% Split dataset with 70/30 ratio while keeping original label proportions
-% in both sets
+
+labelsTable = countEachLabel(imgDatastore);
+minimumSetCount = min(labelsTable.Count); % determine the smallest amount of images in a category 
+
+% Use splitEachLabel method to trim the set to smallest amount
+imgDatastore = splitEachLabel(imgDatastore, minimumSetCount, 'randomized');
+
+% Split normalized dataset with 70/30 ratio while keeping label proportions
 [trainingImages, validationImages] = splitEachLabel(imgDatastore, 0.7, 'randomized');
 
 
@@ -50,4 +56,4 @@ fprintf('Accuracy: %d\n', accuracy);
 
 %% Save Neural Network
 
-save("faceNet", 'faceNet');
+save("./models/CNN", 'faceNet');
