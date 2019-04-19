@@ -1,3 +1,6 @@
+%% Load Data (If needed)
+load datasets;
+
 %% Extract HOG features
 hogCellSize = [8 8];
 trainFeatures = ExtractHogFeatures(trainImgDs, hogCellSize);

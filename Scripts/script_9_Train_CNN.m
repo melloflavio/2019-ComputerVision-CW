@@ -1,19 +1,5 @@
-%% Constant definitions
-inputBasepath = "../Dataset\processed_6";
-
-%% Create Normalized Image Set Collection with ann individuals pictures
-imgDatastore = imageDatastore(inputBasepath, 'IncludeSubfolders',true, 'LabelSource','foldernames');
-numClasses = numel(categories(imgDatastore.Labels));
-
-labelsTable = countEachLabel(imgDatastore);
-minimumSetCount = min(labelsTable.Count); % determine the smallest amount of images in a category 
-
-% Use splitEachLabel method to trim the set to smallest amount
-imgDatastore = splitEachLabel(imgDatastore, minimumSetCount, 'randomized');
-
-% Split normalized dataset with 70/30 ratio while keeping label proportions
-[trainingImages, validationImages] = splitEachLabel(imgDatastore, 0.7, 'randomized');
-
+%% Load Data (If needed)
+load datasets;
 
 %% Setup Neural Network
 
