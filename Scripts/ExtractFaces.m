@@ -1,12 +1,10 @@
-function [faces] = ExtractFaces(imgPath)
+function [faces] = ExtractFaces(image)
 %EXTRACTFACES Extracts all faces from single image and returns the cropped
 %face images in a cell array
-%% Read image
-    imgObj = imread(imgPath);
 
 %% Detect Faces
     faceDetector = vision.CascadeObjectDetector('ClassificationModel','FrontalFaceCART');
-    boundingBoxes = faceDetector(imgObj);
+    boundingBoxes = faceDetector(image);
 
 %% Crop & return faces as a cell array
     faceCount = size(boundingBoxes,1);
