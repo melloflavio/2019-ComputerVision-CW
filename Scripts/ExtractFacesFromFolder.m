@@ -21,7 +21,7 @@ function [] = ExtractFacesFromFolder(inFolder, outFolder)
         [~, imageNamePlain, ~] = fileparts(imagePath); % Get name without extension
         % Extract faces
         imgObj = imread(imagePath);
-        faces = ExtractFaces(imgObj);
+        [faces, ~] = ExtractFaces(imgObj);
 
         % Save Faces to destination folder
         for faceIdx = 1:size(faces,1)

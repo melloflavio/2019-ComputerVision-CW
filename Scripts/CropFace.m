@@ -8,8 +8,8 @@ function [croppedFace] = CropFace(image, boundingBox)
     newdim = 224; % Size of new image
     
     %make square
-    width = round(boundingBox(3)-boundingBox(1));
-    height = round(boundingBox(4)-boundingBox(2));
+    width = boundingBox(3);
+    height = boundingBox(4);
 
     length = (width + height)/2;
 
