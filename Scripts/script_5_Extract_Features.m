@@ -13,14 +13,12 @@ minimumSetCount = min(labelsTable.Count); % determine the smallest amount of ima
 imgDatastore = splitEachLabel(imgDatastore, minimumSetCount, 'randomized');
 
 %% Extract SURF features
-[surfFeatures, surfLabels, surfFeatureBag] = ExtractSurfFeatures(imageDatastore);
+[surfFeatures, surfFeatureBag] = ExtractSurfFeatures(imageDatastore);
 % Saves the feature bag to be used later, when encountering new images so
 % that the same features are extracted.
-save("surfFeatureBag", 'surfFeatureBag');
+save("../models/surfFeatureBag", 'surfFeatureBag');
 
 
 %% Extract HOG features
 hogCellSize = [8 8];
-[hogFeatures, hogLabels, classIndexToLabel] = ExtractHogFeatures(imgSetCollection, hogCellSize);
-% save("hogFeatures", 'hogFeatures');
-% faceClassifier = fitcecoc(hogFeatures, hogLabels);
+hogFeatures = ExtractHogFeatures(imgDatastore, hogCellSize);
