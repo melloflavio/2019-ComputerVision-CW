@@ -12,15 +12,17 @@ function [] = ExtractFrames(folder)
         [~, videoname, ~] = fileparts(videopath);
         videoObj = VideoReader(videopath);
 
-        %   Iterate over all frames in video, outputting to jpg every single
-        %   one
+        %   Iterate over all frames in video, outputting to jpg every
+        %   second frame
         frameIdx = 0;
         while(hasFrame(videoObj))
-            currentFrame = readFrame(videoObj);
-            imgFilename = strcat(videoname, "_", int2str(frameIdx), ".jpg");
-            imgPath = fullfile(folder, imgFilename);
-            imwrite(currentFrame, imgPath);
-            frameIdx = frameIdx +1;
+            if (rem(frameIdx, 2) == 0)
+                currentFrame = readFrame(videoObj);
+                imgFilename = strcat(videoname, "_", int2str(frameIdx), ".jpg");
+                imgPath = fullfile(folder, imgFilename);
+                imwrite(currentFrame, imgPath);
+                frameIdx = frameIdx +1;
+            end
         end
     end
 end
