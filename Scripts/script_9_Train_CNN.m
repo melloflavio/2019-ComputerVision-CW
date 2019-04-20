@@ -24,21 +24,21 @@ options = trainingOptions( ...
     'InitialLearnRate',1e-4,... % Initial Learning rate
     'Verbose',false,... % Omit logs
     'Plots','training-progress',... % Plot progress
-    'ValidationData',validationImages,... % Validation set
+    'ValidationData',testImgDs,... % Validation set
     'ValidationFrequency',numIterationsPerEpoch ... % Run validation every N steps
 );
 
 %% Train Neural Network
 
-faceNet = trainNetwork(trainingImages,layers,options);
+faceNet = trainNetwork(trainImgDs, layers, options);
 
 %% Test Accuracy
 
-predictedLabels = classify(faceNet, validationImages);
+predictedCnn = classify(faceNet, validationImages);
+confCnn = confusionmat(testImgDs.Labels, predictedCnn);
+accuracyCnn = sum(testFeatures.Labels == predictedCnn)/size(predictedCnn, 1);
+fprintf('Accuracy: %d\n', accuracySvm);
 
-confusionMatrix = confusionmat(validationImages.Labels, predictedLabels);
-accuracy = sum(validationImages.Labels == predictedLabels)/size(validationImages.Labels, 1);
-fprintf('Accuracy: %d\n', accuracy);
 
 %% Save Neural Network
 
