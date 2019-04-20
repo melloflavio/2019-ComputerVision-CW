@@ -5,26 +5,25 @@ function [P] = RecogniseFace(I, featureType, classifierName)
 [faces, faceCentres] = ExtractFaces(I);
 
 %% Classify Faces
-    acceptedClassifiers = {'SVM', 'CNN', 'MLP'};
+    acceptedClassifiers = {'SVM', 'CNN', 'RF'};
     acceptedFeatureTypes = {'SURF', 'HOG'};
     
     faceOwners = zeros(size(faces,1), 1);
     if (strcmp(classifierName, 'CNN'))
-        % Call CNN
-        % faceOwners = []
-        
+        faceNet = load("../models/CNN");
+        faceOwners = classify(faceNet, faces);
     elseif (strcmp(classifierName, 'SVM') && strcmp(featureType, 'SURF'))
-        % call SVM - SURF
-        % faceOwners = []
+        surfSvm = load("../models/SVM_SURF");
+        faceOwners = predict(surfSvm, faces);
     elseif (strcmp(classifierName, 'SVM') && strcmp(featureType, 'HOG'))
-        % call SVM - HOG
-        % faceOwners = []
-    elseif (strcmp(classifierName, 'MLP') && strcmp(featureType, 'SURF'))
-        % call MLP - SURF
-        % faceOwners = []
-    elseif (strcmp(classifierName, 'MLP') && strcmp(featureType, 'HOG'))
-        % call MLP - HOG
-        % faceOwners = []
+        hogSvm = load("../models/SVM_HOG");
+        faceOwners = predict(hogSvm, faces);
+    elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'SURF'))
+        surfRf = load("../models/RF_SURF");
+        faceOwners = predict(surfRf, faces);
+    elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'HOG'))
+        hogRf = load("../models/RF_HOG");
+        faceOwners = predict(hogRf, faces);
     else
         error(sprintf(strcat('Classifier and feature type combination not found.', '\n', ...
             sprintf('Accepted classifiers: %s', strjoin(acceptedClassifiers, ' ')), '\n', ...

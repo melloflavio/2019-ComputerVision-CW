@@ -39,9 +39,3 @@ fprintf('Accuracy: %d\n', accuracyRf);
 % Save & clear to free memory
 save("../models/RF_SURF", 'surfRf');
 clear(surfRf);
-
-%% Extract HOG features
-hogCellSize = [8 8];
-hogFeatures = ExtractHogFeatures(imgDatastore, hogCellSize);
-
-save("../models/hogFeatures", 'hogFeatures', 'hogCellSize', '-v7.3');

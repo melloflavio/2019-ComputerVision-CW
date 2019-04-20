@@ -2,7 +2,7 @@
 load datasets;
 
 %% Extract HOG features
-hogCellSize = [8 8];
+hogCellSize = [8 8]; % Determine Hog Cell size
 trainFeatures = ExtractHogFeatures(trainImgDs, hogCellSize);
 testFeatures = ExtractHogFeatures(testImgDs, hogCellSize);
 
@@ -17,7 +17,7 @@ accuracySvm = sum(testFeatures.Labels == predictedSvm)/size(predictedSvm, 1);
 fprintf('Accuracy: %d\n', accuracySvm);
 
 % Save & clear to free memory
-save("../models/SVM_HOG", 'surfHog');
+save("../models/SVM_HOG", 'hogSvm');
 clear(hogSvm);
 
 %% Train Random Forest
@@ -32,5 +32,5 @@ accuracyRf = sum(testFeatures.Labels == predictedRf)/size(predictedRf, 1);
 fprintf('Accuracy: %d\n', accuracyRf);
 
 % Save & clear to free memory
-save("../models/RF_HOG", 'surfRf');
+save("../models/RF_HOG", 'hogRf');
 clear(hogRf);
