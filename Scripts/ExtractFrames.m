@@ -2,6 +2,12 @@ function [] = ExtractFrames(folder)
 %EXTRACTFRAMES Extracts all frames from all videos in a given folder.
 %Outputs the frames as .jpg files in the same folder, using original video
 %filename as suffix
+%% Constants
+    MIN_BRIGHTNESS = 50; % Min brightness to consider image useful & export it
+    NTH_FRAME = 5; % Extract every nth frame
+
+%% Extract Frames
+
     mp4Videos = dir(fullfile(folder, '*.mp4'));
     movVideos = dir(fullfile(folder, '*.mov'));
     allVideos = {mp4Videos.name, movVideos.name};
@@ -16,13 +22,17 @@ function [] = ExtractFrames(folder)
         %   second frame
         frameIdx = 0;
         while(hasFrame(videoObj))
-            if (rem(frameIdx, 2) == 0)
+            if (rem(frameIdx, NTH_FRAME) == 0) % Only take every nth frame
                 currentFrame = readFrame(videoObj);
-                imgFilename = strcat(videoname, "_", int2str(frameIdx), ".jpg");
-                imgPath = fullfile(folder, imgFilename);
-                imwrite(currentFrame, imgPath);
-                frameIdx = frameIdx +1;
+                
+                avgBrightness = mean2(rgb2gray(currentFrame));
+                if (avgBrightness > MIN_BRIGHTNESS) % If img is too dark, we disconsider it
+                    imgFilename = strcat(videoname, "_", int2str(frameIdx), ".jpg");
+                    imgPath = fullfile(folder, imgFilename);
+                    imwrite(currentFrame, imgPath);
+                end
             end
+            frameIdx = frameIdx +1;
         end
     end
 end
