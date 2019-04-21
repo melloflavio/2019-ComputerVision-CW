@@ -14,7 +14,9 @@ function [P] = RecogniseFace(I, featureType, classifierName)
         faceOwners = classify(faceNet, faces);
     elseif (strcmp(classifierName, 'SVM') && strcmp(featureType, 'SURF'))
         surfSvm = load("../models/SVM_SURF");
-        faceOwners = predict(surfSvm, faces);
+        surfFeatureBag = load("../models/surfFeatureBag");
+        faceFeatures = encode(faces, surfFeatureBag);
+        faceOwners = predict(surfSvm, faceFeatures);
     elseif (strcmp(classifierName, 'SVM') && strcmp(featureType, 'HOG'))
         hogSvm = load("../models/SVM_HOG");
         faceOwners = predict(hogSvm, faces);
@@ -23,7 +25,9 @@ function [P] = RecogniseFace(I, featureType, classifierName)
         faceOwners = predict(surfRf, faces);
     elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'HOG'))
         hogRf = load("../models/RF_HOG");
-        faceOwners = predict(hogRf, faces);
+        surfFeatureBag = load("../models/surfFeatureBag");
+        faceFeatures = encode(faces, surfFeatureBag);
+        faceOwners = predict(hogRf, faceFeatures);
     else
         error(sprintf(strcat('Classifier and feature type combination not found.', '\n', ...
             sprintf('Accepted classifiers: %s', strjoin(acceptedClassifiers, ' ')), '\n', ...
