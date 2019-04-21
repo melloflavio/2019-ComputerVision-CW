@@ -4,7 +4,7 @@ function [] = ExtractFrames(folder)
 %filename as suffix
 %% Constants
     MIN_BRIGHTNESS = 50; % Min brightness to consider image useful & export it
-    NTH_FRAME = 5; % Extract every nth frame
+    NTH_FRAME = 10; % Extract every nth frame
 
 %% Extract Frames
 

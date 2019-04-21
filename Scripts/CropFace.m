@@ -18,10 +18,12 @@ function [croppedFace] = CropFace(image, boundingBox)
     
     % Calculates boundinbox coordinates, uses epsilon to round towards
     % including the edge pixels
-    x1= centrepoint(1) - round((1+epsilon)*length/2);
-    y1= centrepoint(2) - round((1+epsilon)*length/2);
-    x2= centrepoint(1) + round((1+epsilon)*length/2);
-    y2= centrepoint(2) + round((1+epsilon)*length/2);
+    % Use floor and ceil to ensure x/y are integers, required when
+    % selecting individual pixels
+    x1= floor(centrepoint(1) - round((1+epsilon)*length/2));
+    y1= floor(centrepoint(2) - round((1+epsilon)*length/2));
+    x2= ceil(centrepoint(1) + round((1+epsilon)*length/2));
+    y2= ceil(centrepoint(2) + round((1+epsilon)*length/2));
 
 
     % prevent going off the page
