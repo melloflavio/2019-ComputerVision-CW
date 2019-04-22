@@ -10,6 +10,7 @@ function [] = ExtractFacesFromFolder(inFolder, outFolder)
 
     %% Process in/out paths
     allImages = dir(fullfile(inFolder, "*.jpg")); % Get images from inFolder
+    allImages = [allImages, dir(fullfile(inFolder, "*.jpeg"))];
     mkdir(outFolder); % Ensure outfolder exists to avoid permission issues with imwrite
 
     %% Iterate over images extracting & saving faces
