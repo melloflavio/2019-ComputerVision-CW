@@ -1,5 +1,5 @@
 %% Load Data (If needed)
-load datasets;
+% load datasets;
 
 %% Extract HOG features
 hogCellSize = [8 8]; % Determine Hog Cell size

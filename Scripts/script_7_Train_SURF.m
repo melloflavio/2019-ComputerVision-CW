@@ -4,8 +4,8 @@ load datasets;
 %% Extract SURF features
 % Build a feature bag based on training set
 surfFeatureBag = bagOfFeatures(trainImgDs);
-trainFeatures = encode(trainImgDs, surfFeatureBag);
-testFeatures = encode(testImgDs, surfFeatureBag);
+trainFeatures = encode(surfFeatureBag, trainImgDs);
+testFeatures = encode(surfFeatureBag, testImgDs);
 
 % Saves the feature bag. It will be needed later, when encountering
 % new images, so that we can extract the same features occurrences
