@@ -22,12 +22,12 @@ function [P] = RecogniseFace(I, featureType, classifierName)
         faceOwners = predict(hogSvm, faces);
     elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'SURF'))
         surfRf = load("../models/RF_SURF");
-        faceOwners = predict(surfRf, faces);
-    elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'HOG'))
-        hogRf = load("../models/RF_HOG");
         surfFeatureBag = load("../models/surfFeatureBag");
         faceFeatures = encode(faces, surfFeatureBag);
-        faceOwners = predict(hogRf, faceFeatures);
+        faceOwners = predict(surfRf, faceFeatures);
+    elseif (strcmp(classifierName, 'RF') && strcmp(featureType, 'HOG'))
+        hogRf = load("../models/RF_HOG");
+        faceOwners = predict(hogRf, faces);
     else
         error(sprintf(strcat('Classifier and feature type combination not found.', '\n', ...
             sprintf('Accepted classifiers: %s', strjoin(acceptedClassifiers, ' ')), '\n', ...
