@@ -1,6 +1,10 @@
 %% Load Data (If needed)
 load datasets;
 
+%% Determine Data Dimension
+
+numClasses = size(categories(trainImgDs.Labels), 1);
+
 %% Setup Neural Network
 
 % Based on Slides on Lecture 07
@@ -15,7 +19,7 @@ layers = [
     softmaxLayer
     classificationLayer
 ];
-miniBatchSize = 10;
+miniBatchSize = 5;
 numIterationsPerEpoch = floor(numClasses/miniBatchSize);
 options = trainingOptions( ...
     'sgdm',... % Use stochastic gradient descent with momentum optimizer
