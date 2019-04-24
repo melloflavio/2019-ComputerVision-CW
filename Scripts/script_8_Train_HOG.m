@@ -7,7 +7,7 @@ hogCellSize = [8 8]; % Determine Hog Cell size
 trainFeatures = ExtractHogFeatures(trainImgDs, hogCellSize);
 testFeatures = ExtractHogFeatures(testImgDs, hogCellSize);
 
-%% Train NB
+%% Naive Bayes -  NB
 disp("Training NB...");
 tic;
 hogNb = fitcnb(trainFeatures, trainImgDs.Labels);
@@ -21,10 +21,10 @@ accuracyNb = sum(testImgDs.Labels == predictedNb)/size(predictedNb, 1);
 fprintf('Accuracy: %d\n', accuracyNb);
 
 % Save & clear to free memory
-save("../results/NB_HOG", 'confNb');
+save("../results/NB_HOG_CONF", 'confNb');
 save("../models/NB_HOG", 'hogNb', '-v7.3');
 
-%% HOG
+%% Support Vector Machine - SVM
 disp("Training SVM...");
 tic;
 % Train
@@ -39,11 +39,11 @@ accuracySvm = sum(testImgDs.Labels == predictedSvm)/size(predictedSvm, 1);
 fprintf('Accuracy: %d\n', accuracySvm);
 
 % Save & clear to free memory
-save("../results/SVM_HOG", 'confSvm');
+save("../results/SVM_HOG_CONF", 'confSvm');
 save("../models/SVM_HOG", 'hogSvm', '-v7.3');
 clear(hogSvm);
 
-%% Train Random Forest
+%% Random Forest - RF
 %Train
 disp("Training Random Forest...");
 tic;
@@ -60,6 +60,6 @@ accuracyRf = sum(testImgDs.Labels == predictedRf)/size(predictedRf, 1);
 fprintf('Accuracy: %d\n', accuracyRf);
 
 % Save & clear to free memory
-save("../results/RF_HOG", 'confRf');
+save("../results/RF_HOG_CONF", 'confRf');
 save("../models/RF_HOG", 'hogRf', '-v7.3');
 clear(hogRf);
