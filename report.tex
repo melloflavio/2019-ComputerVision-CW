@@ -100,10 +100,10 @@
         During the labeling process a few outliers were noted they are present in this section:
 
         \subsubsubsection*{Unlabeled Individuals}
-            In the group data, there are some individuals who are not present in the labeled individual pictures. This could be either because they simply not present in the lab section when the labeling was made, or they chose not to be labeled. Because the face extraction step will still select these faces when presented with a group image, and to avoid having these individuals being misclassified as one of the labeled ones, they were given arbitrary labels, which are then used to remove these entries when returning the P matrix in the RecognizeFace script. Figure \ref{fig:label:unlabeled_inds} shows the individuals in question.
+            In the group data, there are some individuals who are not present in the labeled individual pictures. This could be either because they simply not present in the lab section when the labeling was made, or they chose not to be labeled. In this particular case, I opted to ignore these images and not include them in the dataset. Despite knowing the face extraction step will still select these faces when presented with a group image, and they will inevitably be classified as another individual - one of the properly labeled ones. This choice was made based on the fact the, prior to training the classifiers, the full dataset is trimmed to ensure all classes have the same amount of data to ensure there is no distribution bias in the models: That is that they classify based on the features alone, and not on some expected distribution of the classes. Each face has the same probability of appearing, and any discrepancies in the amount of data available is either due to minor changes in the human data collection (e.g. videos of not the exact same length) or, in other cases, or due to difficulties in the face detection algorithm used (further explained in section \ref{sec:face_labeling:outliers:difficulties}). If I was to include these faces as labels, the amount of data used for training would be vastly reduce given that these individuals have considerably less examples than the other ones. Figure \ref{fig:label:unlabeled_inds} shows the individuals in question.
             \begin{figure}[ht]
                 \centering
-                \includegraphics[height=4cm]{./Images/labeling/unlabeled_inds.jpg}
+                \includegraphics[height=4cm]{./Images/labeling/unlabeled_inds.png}
                 \caption{Individuals that did not have individual pictures with labels}
                 \label{fig:label:unlabeled_inds}
             \end{figure}
@@ -116,6 +116,9 @@
                 \caption{Images that were left out of the dataset due to extreme poor quality}
                 \label{fig:label:blurry}
             \end{figure}
+
+        \subsubsubsection*{Face Extraction Difficulties}\label{sec:face_labeling:outliers:difficulties}
+            The face detection algorithm used leverages the Viola-Jones algorithm with Haar features to detect changes in shade in specific regions of the face, such as eyes, nose and forehead. It is known that this particular type of detection strategy is inherently biased (see http://gendershades.org/), being able to detect lighter skinned faces with considerably better than darker skinned ones. This effect was observed in more evidently in the faces extracted from the group data where one individual had around 20\% instances of her face detected when compared to the rest of the data. It is of the utmost importance to stress how this type seemingly innocent of bias could lead to unwanted biases in other critical applications of computer vision, specially considering that face detection often lies at the initial stages of a computer vision based pipeline.
 
 
 % \subsection{File Sorting}
