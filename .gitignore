@@ -2,6 +2,11 @@ Dataset/*
 
 ## Custom
 # Matlab
+
+# Ignore large models, but keep confusion matrixes
+*.mat
+!*CONF.mat
+# Intermediate files
 *.asv
 # Sandbox used for testing code excerpts
 test.m
