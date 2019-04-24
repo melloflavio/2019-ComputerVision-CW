@@ -21,7 +21,8 @@ function [hogFeatures] = ExtractHogFeatures(imgDatastore, cellSize)
     % continuous array
     for imageIdx=1:numImages
         currentImage = readimage(imgDatastore, imageIdx);
-        hogFeatures(imageIdx,:) = extractHOGFeatures(currentImage);
+        currentFeatures = extractHOGFeatures(currentImage, 'CellSize', cellSize);
+        hogFeatures(imageIdx,:) = currentFeatures;
     end
 
 end
