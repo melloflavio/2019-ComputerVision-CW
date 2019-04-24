@@ -5,7 +5,7 @@ function [croppedFace] = CropFace(image, boundingBox)
 %CROPFACE Crops a square around the center of the bounding box provided
 %locating the recognized face.
     epsilon = 0.1; % Used for rounding new box coordinates
-    newdim = 224; % Size of new image
+    newdim = 227; % Size of new image
     
     %make square
     width = boundingBox(3);
@@ -34,7 +34,6 @@ function [croppedFace] = CropFace(image, boundingBox)
 
 
     image = image(y1:y2,x1:x2,:);
-    sizeimg = size(image);
-    croppedFace = imresize(image,(newdim/sizeimg(1)));		
+    croppedFace = imresize(image,[newdim newdim]);		
 end
 
