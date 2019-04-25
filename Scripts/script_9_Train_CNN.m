@@ -37,13 +37,22 @@ options = trainingOptions( ...
 faceNet = trainNetwork(trainImgDs, layers, options);
 
 %% Test Accuracy
-
-predictedCnn = classify(faceNet, validationImages);
-confCnn = confusionmat(testImgDs.Labels, predictedCnn);
-accuracyCnn = sum(testFeatures.Labels == predictedCnn)/size(predictedCnn, 1);
-fprintf('Accuracy: %d\n', accuracySvm);
+categoriesList = categories(testImgDs.Labels);
+predictedCnn = categorical(zeros(size(testImgDs.Labels)));
+tic;
+for i = 1:size(testImgDs.Labels, 1)
+    img = readimage(testImgDs, i);
+    prediction = classify(faceNet, img);
+    label = categorical(categoriesList(prediction));
+    predictedCnn(i) = label;
+end
+fprintf("Predicted in %f seconds...\n", toc);
+confCnn = confusionmat(testImgDs.Labels, predictedCnn_2);
+accuracyCnn = sum(testImgDs.Labels == predictedCnn_2)/size(predictedCnn_2, 1);
+fprintf('Accuracy: %d\n', accuracyCnn);
 
 
 %% Save Neural Network
 
 save("../models/CNN", 'faceNet');
+save("../models/categoriesList", 'categoriesList');
