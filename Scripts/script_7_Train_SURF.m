@@ -1,25 +1,25 @@
-% %% Load Data (If needed)
-% load datasets;
-% 
-% %% Extract SURF feature bag
-% % Build a feature bag based on a subset of the training set to avoid memory
-% % issues
-% [trainBagImgDs, ~] = splitEachLabel(trainImgDs, 0.5, 'randomized');
-% 
-% disp("Building Feature Bag");
-% tic;
-% surfFeatureBag = bagOfFeatures(trainBagImgDs);
-% fprintf("Done in %f seconds...\n", toc);
-% %% Encode Features based on Feature bag
-% disp("Encoding Features");
-% tic;
-% trainFeatures = encode(surfFeatureBag, trainImgDs);
-% testFeatures = encode(surfFeatureBag, testImgDs);
-% fprintf("Done in %f seconds...\n", toc);
-% 
-% % Saves the feature bag. It will be needed later, when encountering
-% % new images, so that we can extract the same features occurrences
-% save("../models/surfFeatureBag", 'surfFeatureBag');
+%% Load Data (If needed)
+load datasets;
+
+%% Extract SURF feature bag
+% Build a feature bag based on a subset of the training set to avoid memory
+% issues
+[trainBagImgDs, ~] = splitEachLabel(trainImgDs, 0.5, 'randomized');
+
+disp("Building Feature Bag");
+tic;
+surfFeatureBag = bagOfFeatures(trainBagImgDs);
+fprintf("Done in %f seconds...\n", toc);
+%% Encode Features based on Feature bag
+disp("Encoding Features");
+tic;
+trainFeatures = encode(surfFeatureBag, trainImgDs);
+testFeatures = encode(surfFeatureBag, testImgDs);
+fprintf("Done in %f seconds...\n", toc);
+
+% Saves the feature bag. It will be needed later, when encountering
+% new images, so that we can extract the same features occurrences
+save("../models/surfFeatureBag", 'surfFeatureBag');
 %% Naive Bayes - NB
 disp("Training NB...");
 tic;
