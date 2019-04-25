@@ -6,10 +6,14 @@
 \documentclass[11pt]{article}
 % \documentclass[11pt, twocolumn]{elsarticle}
 % \documentclass{ieeetran}
-
+\usepackage[margin=0.70in]{geometry} % Change Margins
 \usepackage{mathtools}
 \usepackage{textgreek}
 \usepackage{graphics}
+\usepackage[shortlabels]{enumitem} % Enum with letters
+\usepackage{makecell}
+\renewcommand\theadfont{\bfseries\sffamily}
+
 
 
 \title{Title of my document}
@@ -72,7 +76,7 @@
 
         \begin{table}[h!]
             \centering
-            \begin{tabular}{||c c c||}\label{tab:cluster_passes}
+            \begin{tabular}{||c c c||}
                 \hline
                 Cluster Epoch & Sorted Images & Acc. Sorted \% \\ [0.5ex]
                 \hline\hline
@@ -145,20 +149,54 @@
     \subsection{Unrecognized Faces}\label{sec:non-faces}
         As exposed in section \ref{sec:face_labeling}, it is more than expected for the facial face detection algorithm to have some false positive rate. This is true at the prediction stage just as much as it is during the preprocessing portion of the pipeline. However, at the prediction stage it is not possible to leverage human input to ignore these regions. One solution for dealing with this problem is to collect all the false positives found in the training stage and treat them as belonging to a new label representing all instances of non-faces extracted from the provided data. Then, if a given face is predicted as belonging to this label, it is ignored when outputting the results of the RecognizeFace function. This was the strategy implemented in this study. An alternative, which was not pursued, could be to ensure the predictors output, along with the predicted label, a confidence score and establish a minimum threshold, ignoring any predictions with scores below said mark.
 
-\subsection{Training Process}
-    \subsubsection{Data Partitioning}
-        As mentioned in section \ref{sec:face_labeling:outliers:unlabeled}, there are some discrepancies in the amount of data available for each individual. To ensure no bias is introduced in terms of data distribution, I opted to trim the dataset, forcing all classes to equally distributed in the dataset used. After said trimming process, the resulting balanced data is split into train and test sets according to a 85/15 ratio while keeping both subsets balanced as well. In both the trimming and train/test split, data is selected randomly from each label pool to be a part of the new dataset by use of the \texttt{'randomized'} flag in the \texttt{splitEachLabel} function.
+    \subsection{Training Process}
+        \subsubsection{Data Partitioning}
+            As mentioned in section \ref{sec:face_labeling:outliers:unlabeled}, there are some discrepancies in the amount of data available for each individual. To ensure no bias is introduced in terms of data distribution, I opted to trim the dataset, forcing all classes to equally distributed in the dataset used. After said trimming process, the resulting balanced data is split into train and test sets according to a 85/15 ratio while keeping both subsets balanced as well. In both the trimming and train/test split, data is selected randomly from each label pool to be a part of the new dataset by use of the \texttt{'randomized'} flag in the \texttt{splitEachLabel} function.
 
-    \subsubsection{Conventional Classifiers}
-        For the conventional classifiers used (NB, KNN, SVM and RF), the training process is broken down into 2 steps. Feature extraction and training. Feature extraction entails in using either feature descriptor (SURF or HOG) to transform the raw images into a bag of features, which is then ready to be fed into the classifiers along with the image labels.
-    \subsubsubsection*{HOG}
-        HOG features are extracted according to an user-defined cell size which is used to traverse the complete image (with some overlapping) and calculate the oriented gradients for each subsection of the image. The number of features generated when using HOG is, therefore, a function of a) the image size, b) the cell size and c) the overlapping size. It is important for classification tasks then to ensure the exact same values for these three parameters are the same for all observations (training, testing and new predictions). For this experiment HOG features were extracted using an 8x8 cell, images were all 227x227x3 (RGB channel) and overlapping was kept at 50\%.
-    \subsubsubsection*{SURF}
-        SURF features are different than HOG ones in the sense that the number of features present in an image is variable and depends on the image contents as well rather than only in metadata and hyperparameters. It is necessary then for some form of feature selection to ensure all observations have the same amount of features - this is done by way of a feature bag. The original SURF features are extracted from every single image in the training set, the weakest ones are dropped (20\% in this study) and the resulting visual features are then clustered, using K-Means, as a form of quantization. These N clusters then become the bag of features which is used to encode raw images into N features. In this experiment N was kept at the default value - 500. This generate bag of features must be saved for future use in order to be able to transform new observations in the form of raw images into the feature vectors used in the classifiers.
-        One important point is that, in this particular experiment, I was not able to build the bag of features using the complete dataset due to resource limitations on my development machine. The bag creation process is memory intensive, when using the complete dataset, it easily depleted the available memory (16GB) and even used some disk space as swap memory. Even then, the command failed in Matlab due to out of memory errors. The solution then was to build the bag of words using a subset of the data (50\% selected randomly while keeping class balance, ??????? images in total), and then encode the complete training data before feeding it into the classifiers. Given the restrictions imposed by the hardware, this was a sensible compromise. even though the bag was built with a subset of the data, the full training/testing sets were used to train and evaluate the models.
+        \subsubsection{Conventional Classifiers}
+            For the conventional classifiers used (NB, KNN, SVM and RF), the training process is broken down into 2 steps. Feature extraction and training. Feature extraction entails in using either feature descriptor (SURF or HOG) to transform the raw images into a bag of features, which is then ready to be fed into the classifiers along with the image labels.
+        \subsubsubsection*{HOG}
+            HOG features are extracted according to an user-defined cell size which is used to traverse the complete image (with some overlapping) and calculate the oriented gradients for each subsection of the image. The number of features generated when using HOG is, therefore, a function of a) the image size, b) the cell size and c) the overlapping size. It is important for classification tasks then to ensure the exact same values for these three parameters are the same for all observations (training, testing and new predictions). For this experiment HOG features were extracted using an 8x8 cell, images were all 227x227x3 (RGB channel) and overlapping was kept at 50\%.
+        \subsubsubsection*{SURF}
+            SURF features are different than HOG ones in the sense that the number of features present in an image is variable and depends on the image contents as well rather than only in metadata and hyperparameters. It is necessary then for some form of feature selection to ensure all observations have the same amount of features - this is done by way of a feature bag. The original SURF features are extracted from every single image in the training set, the weakest ones are dropped (20\% in this study) and the resulting visual features are then clustered, using K-Means, as a form of quantization. These N clusters then become the bag of features which is used to encode raw images into N features. In this experiment N was kept at the default value - 500. This generate bag of features must be saved for future use in order to be able to transform new observations in the form of raw images into the feature vectors used in the classifiers.
+            One important point is that, in this particular experiment, I was not able to build the bag of features using the complete dataset due to resource limitations on my development machine. The bag creation process is memory intensive, when using the complete dataset, it easily depleted the available memory (16GB) and even used some disk space as swap memory. Even then, the command failed in Matlab due to out of memory errors. The solution then was to build the bag of words using a subset of the data (50\% selected randomly while keeping class balance, totaling 8085 images), and then encode the complete training data before feeding it into the classifiers. Given the restrictions imposed by the hardware, this was a sensible compromise: even though the bag was built with a subset of the data, the high sampling rate from the video material means that consecutive extracted faces are highly similar and, therefore their underlying visual features should be as well. Furthermore the full training/testing sets were subsequently used to train and evaluate the models.
 
-\subsection{Prediction Process}
-\subsection{Initial Results}
+    \subsection{Prediction Process}
+        The prediction process is somewhat straightforward. Given an image, the program leverages the same functions used in the preprocessing pipeline to detect, crop and scale the faces, resulting in two arrays: One containing the 227x227x3 images of the extracted faces, and another containing the X and Y points indicating the centre of the facial respective facial regions detected. Centre is calculated as the centrepoint of the rectangular bounding box detected by the cascading face detector.
+        Then the program determines which model should be used based on the \texttt{featureType} and \textttt{classifierName} variables provided by the user; loads said model; extracts the corresponding features from the faces array (if necessary) and proceeds to predict the labels using the selected model. Once the labels are predicted, a filtering step is applied to remove from the list faces that were predicted to belong to the \textit{non\_faces} artificial label. Finally, the response matrix is assembled to conform to the specified format. Note that, for the feature extraction step, it is necessary to reuse the same featureBag used for training the SURF-based classifiers and the same cell size used for the HOG-based ones.
+    \subsection{Classifier Results}
+        The results
+
+
+
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{||c c c c c c p{5cm}||}
+            \hline
+                \thead{Feature \\ Type} & \thead{Classifier} & \thead{Training \\ Time (s)} & \thead{Prediction \\ Time (s)} & \thead{Test Set \\ Accuracy} & \thead{Model \\ Size (GB)} & \thead{Obs.} \\ [0.5ex]
+            \hline\hline
+            HOG & NB & 800 & 58 & 78\% & 3.6 & - \\
+            \hline
+            HOG & KNN & 71 & 340 & 87\% & 3.4 & 5 NN \\
+            \hline
+            HOG & SVM & 6030 & 394 & 88\% & 4.4 & Linear kernel \\
+            \hline
+            HOG & RF & 612 & 28 & 84\% & 4.2 & 100 Trees \\
+            \hline
+            SURF & NB & 87 & 525 & 65\% & 0.34 & - \\
+            \hline
+            SURF & KNN & 0.57 & 5 & 80\% & 0.033 & 5 NN \\
+            \hline
+            SURF & SVM & 61 & 9 & 75\% & 0.056 & Linear kernel \\
+            \hline
+            SURF & RF & 74 & 2 & 84\% & 0.68 & 100 Trees \\
+            \hline
+            CNN & CNN & 9194 & 10 & 90\% & 0.23 & Transfer Learning based on AlexNet \\
+            \hline
+        \end{tabular}
+        \caption{Facial Recognition Results by Feature and Classifier Type}
+        \label{table:results}
+    \end{table}
 \subsection{Tuning}
 \subsection{Model Selection}
 \section{Digit Recognition}
@@ -168,6 +206,7 @@
 \section{Conclusion}
 \section{Further Work}
 - TF/IDF
+- rotation leveling
 - Tuning Hyperparameters
 - CNN from scratch
 - SURF/HOG cell sizes & other hyperparams (n clusters in SURF)
