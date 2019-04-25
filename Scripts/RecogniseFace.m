@@ -13,9 +13,10 @@ function [P] = RecogniseFace(I, featureType, classifierName)
 
         faceOwners = categorical(zeros(size(faces)));
         if (strcmp(classifierName, 'CNN'))
-            % Load CNN & categories dictionary
-            faceNet = load("../models/CNN");
-            categoriesList = load("../models/categoriesList");
+            % Load CNN
+            cnnModel = load("../models/CNN");
+            faceNet = cnnModel.faceNet;
+            faceOwners = classify(faceNet, faces);
             % Predict faces individually due to limitations in GPU memory
             for i = 1:size(faces,1)
                 currentFace = faces(i);
@@ -35,16 +36,16 @@ function [P] = RecogniseFace(I, featureType, classifierName)
             % Load user selected model & predict faces
             if(strcmp(classifierName, 'NB'))
                 model = load("../models/NB_SURF");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.surfNb, faceFeatures);
             elseif(strcmp(classifierName, 'KNN'))
                 model = load("../models/KNN_SURF");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.surfKnn, faceFeatures);
             elseif(strcmp(classifierName, 'SVM'))
                 model = load("../models/SVM_SURF");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.surfSvm, faceFeatures);
             elseif(strcmp(classifierName, 'RF'))
                 model = load("../models/RF_SURF");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.surfRf, faceFeatures);
             
             else % Model combination not found
                 error(sprintf(strcat('Classifier and feature type combination not found.', '\n', ...
@@ -71,16 +72,16 @@ function [P] = RecogniseFace(I, featureType, classifierName)
             % Load user selected model & predict faces
             if(strcmp(classifierName, 'NB'))
                 model = load("../models/NB_HOG");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.hogNb, faceFeatures);
             elseif(strcmp(classifierName, 'KNN'))
                 model = load("../models/KNN_HOG");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.hogKnn, faceFeatures);
             elseif(strcmp(classifierName, 'SVM'))
                 model = load("../models/SVM_HOG");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.hogSvm, faceFeatures);
             elseif(strcmp(classifierName, 'RF'))
                 model = load("../models/RF_HOG");
-                faceOwners = predict(model, faceFeatures);
+                faceOwners = predict(model.hogRf, faceFeatures);
             
             else % Model combination not found
                 error(sprintf(strcat('Classifier and feature type combination not found.', '\n', ...
