@@ -67,7 +67,7 @@
         After the failure of the classifier labeling approach, I decided to follow a slightly less automated one: clustering. In this methodology, instead of trying to predict the label of each face individually, all the faces extracted from the group data (over 30 000) are clustered using K-Means and images are then exported to separate folders according to their cluster id. This method does not have the benefit of automated labeling in the sense that it still requires manual input in the form of assigning a label to each face by recognizing the face and moving the file into its respective label folder. However, by grouping like images in folders some presorting is effectively made. Now it is more probable that a series of images belonging to the same label are ordered next to each other, furthermore, each folder contains only a small subset of different labels - in this experiment it was not rare to have folders with images from a single label and most folders containing up to 5 different labels. This setup vastly improves the labeling speed, by traversing a list of like images, the human vision system is able to quickly identify if any outlier is present. This method relies, then, on having as many images from the same person in a row as possible so that the label discovering is done only once for a large group of images. Needless to say, the number of clusters used plays an important role in providing proper grouping. Smaller amount of clusters increases the likelihood of having individual clusters with multiple labels. Conversely, if the cluster number if too large, what would be a single large chunk can be separated into multiple clusters. For the purpose of this task, I opted to cluster the data into 100 clusters (approximately 1.5x the amount of labels) to provide some separation while keeping the number of folders manageable. I then proceeded to labeling the data iteratively by focusing on these larger chunks of images, and ignoring groups/folder which had too may different labels to enable a efficient form of selecting large groups. Figure \ref{fig:label:samples} shows a few examples of the data resulting from clustering.
         \begin{figure}[ht]
             \centering
-            \includegraphics[height=4cm]{./Images/labeling/samples.png}
+            \includegraphics[height=7cm]{./Images/labeling/samples.png}
             \caption{Examples of image groupings resulting from clustering. Contiguous groups (left) are preferred, but some patterns allow for quick vertical selection as well (right)}
             \label{fig:label:samples}
         \end{figure}
@@ -95,7 +95,7 @@
 
         \begin{figure}[ht]
             \centering
-            \includegraphics[height=4cm]{./Images/labeling/cheatsheet.png}
+            \includegraphics[height=7cm]{./Images/labeling/cheatsheet.png}
             \caption{Labeling Reference Sheet}
             \label{fig:label:cheatsheet}
         \end{figure}
@@ -103,8 +103,8 @@
     \subsubsection{Label Results: Outliers and Unlabeled}\label{sec:face_labeling:outliers}
         During the labeling process a few outliers were noted they are present in this section:
 
-        \subsubsubsection*{Unlabeled Individuals}\label{sec:face_labeling:outliers:unlabeled}
-            In the group data, there are some individuals who are not present in the labeled individual pictures. This could be either because they simply not present in the lab section when the labeling was made, or they chose not to be labeled. In this particular case, I opted to ignore these images and not include them in the dataset. Despite knowing the face extraction step will still select these faces when presented with a group image, and they will inevitably be classified as another individual - one of the properly labeled ones. This choice was made based on the fact the, prior to training the classifiers, the full dataset is trimmed to ensure all classes have the same amount of data to ensure there is no distribution bias in the models: That is that they classify based on the features alone, and not on some expected distribution of the classes. Each face has the same probability of appearing, and any discrepancies in the amount of data available is either due to minor changes in the human data collection (e.g. videos of not the exact same length) or, in other cases, or due to difficulties in the face detection algorithm used (further explained in section \ref{sec:face_labeling:outliers:difficulties}). If I was to include these faces as labels, the amount of data used for training would be vastly reduce given that these individuals have considerably less examples than the other ones. Figure \ref{fig:label:unlabeled_inds} shows the individuals in question.
+        \subsubsection{Unlabeled Individuals}
+            In the group data, there are some individuals who are not present in the labeled individual pictures. This could be either because they simply not present in the lab section when the labeling was made, or they chose not to be labeled. In this particular case, I opted to ignore these images and not include them in the dataset. Despite knowing the face extraction step will still select these faces when presented with a group image, and they will inevitably be classified as another individual - one of the properly labeled ones. This choice was made based on the fact the, prior to training the classifiers, the full dataset is trimmed to ensure all classes have the same amount of data to ensure there is no distribution bias in the models: That is that they classify based on the features alone, and not on some expected distribution of the classes. Each face has the same probability of appearing, and any discrepancies in the amount of data available is either due to minor changes in the human data collection (e.g. videos of not the exact same length) or, in other cases, or due to difficulties in the face detection algorithm used (further explained in section \ref{sec:face_labeling:outliers}). If I was to include these faces as labels, the amount of data used for training would be vastly reduce given that these individuals have considerably less examples than the other ones. Figure \ref{fig:label:unlabeled_inds} shows the individuals in question.
             \begin{figure}[ht]
                 \centering
                 \includegraphics[height=4cm]{./Images/labeling/unlabeled_inds.png}
@@ -112,16 +112,16 @@
                 \label{fig:label:unlabeled_inds}
             \end{figure}
 
-        \subsubsubsection*{Unlabelable Images}
+        \subsubsection{Unlabelable Images}
             Considering the faces were also extracted from video material, which is of considerably lower resolution than the images, some of the faces were too unfocused/blurred for me to be able to confidently label them. As they are singnificantly small in number when compared to the rest of the data, I opted to remove them from the dataset instead of risking introducing erroneous data by human error. Figure \ref{fig:label:blurry} shows some examples of images that were left out of the final dataset.
             \begin{figure}[ht]
                 \centering
-                \includegraphics[height=4cm]{./Images/labeling/blurry.jpg}
+                \includegraphics[height=4cm]{./Images/labeling/blurry.png}
                 \caption{Images that were left out of the dataset due to extreme poor quality}
                 \label{fig:label:blurry}
             \end{figure}
 
-        \subsubsubsection*{Face Extraction Difficulties}\label{sec:face_labeling:outliers:difficulties}
+        \subsubsection{Face Extraction Difficulties}
             The face detection algorithm used leverages the Viola-Jones algorithm with Haar features to detect changes in shade in specific regions of the face, such as eyes, nose and forehead. It is known that this particular type of detection strategy is inherently biased (see http://gendershades.org/), being able to detect lighter skinned faces with considerably better than darker skinned ones. This effect was observed in more evidently in the faces extracted from the group data where one individual had around 20\% instances of her face detected when compared to the rest of the data. It is of the utmost importance to stress how this type seemingly innocent of bias could lead to unwanted biases in other critical applications of computer vision and should be combated, specially considering that face detection often lies at the initial stages of a computer vision based pipeline.
 
 
@@ -151,20 +151,20 @@
 
     \subsection{Training Process}
         \subsubsection{Data Partitioning}
-            As mentioned in section \ref{sec:face_labeling:outliers:unlabeled}, there are some discrepancies in the amount of data available for each individual. To ensure no bias is introduced in terms of data distribution, I opted to trim the dataset, forcing all classes to equally distributed in the dataset used. After said trimming process, the resulting balanced data is split into train and test sets according to a 85/15 ratio while keeping both subsets balanced as well. In both the trimming and train/test split, data is selected randomly from each label pool to be a part of the new dataset by use of the \texttt{'randomized'} flag in the \texttt{splitEachLabel} function.
+            As mentioned in section \ref{sec:face_labeling:outliers}, there are some discrepancies in the amount of data available for each individual. To ensure no bias is introduced in terms of data distribution, I opted to trim the dataset, forcing all classes to equally distributed in the dataset used. After said trimming process, the resulting balanced data is split into train and test sets according to a 85/15 ratio while keeping both subsets balanced as well. In both the trimming and train/test split, data is selected randomly from each label pool to be a part of the new dataset by use of the \texttt{'randomized'} flag in the \texttt{splitEachLabel} function.
 
         \subsubsection{Conventional Classifiers}
             For the conventional classifiers used (NB, KNN, SVM and RF), the training process is broken down into 2 steps. Feature extraction and training. Feature extraction entails in using either feature descriptor (SURF or HOG) to transform the raw images into a bag of features, which is then ready to be fed into the classifiers along with the image labels.
-        \subsubsubsection*{HOG}
+        \subsubsection*{HOG}
             HOG features are extracted according to an user-defined cell size which is used to traverse the complete image (with some overlapping) and calculate the oriented gradients for each subsection of the image. The number of features generated when using HOG is, therefore, a function of a) the image size, b) the cell size and c) the overlapping size. It is important for classification tasks then to ensure the exact same values for these three parameters are the same for all observations (training, testing and new predictions). For this experiment HOG features were extracted using an 8x8 cell, images were all 227x227x3 (RGB channel) and overlapping was kept at 50\%.
-        \subsubsubsection*{SURF}
+        \subsubsection*{SURF}
             SURF features are different than HOG ones in the sense that the number of features present in an image is variable and depends on the image contents as well rather than only in metadata and hyperparameters. It is necessary then for some form of feature selection to ensure all observations have the same amount of features - this is done by way of a feature bag. The original SURF features are extracted from every single image in the training set, the weakest ones are dropped (20\% in this study) and the resulting visual features are then clustered, using K-Means, as a form of quantization. These N clusters then become the bag of features which is used to encode raw images into N features. In this experiment N was kept at the default value - 500. This generate bag of features must be saved for future use in order to be able to transform new observations in the form of raw images into the feature vectors used in the classifiers.
             One important point is that, in this particular experiment, I was not able to build the bag of features using the complete dataset due to resource limitations on my development machine. The bag creation process is memory intensive, when using the complete dataset, it easily depleted the available memory (16GB) and even used some disk space as swap memory. Even then, the command failed in Matlab due to out of memory errors. The solution then was to build the bag of words using a subset of the data (50\% selected randomly while keeping class balance, totaling 8085 images), and then encode the complete training data before feeding it into the classifiers. Given the restrictions imposed by the hardware, this was a sensible compromise: even though the bag was built with a subset of the data, the high sampling rate from the video material means that consecutive extracted faces are highly similar and, therefore their underlying visual features should be as well. Furthermore the full training/testing sets were subsequently used to train and evaluate the models.
 
     \subsection{Prediction Process}
         The prediction process is somewhat straightforward. Given an image, the program leverages the same functions used in the preprocessing pipeline to detect, crop and scale the faces, resulting in two arrays: One containing the 227x227x3 images of the extracted faces, and another containing the X and Y points indicating the centre of the facial respective facial regions detected. Centre is calculated as the centrepoint of the rectangular bounding box detected by the cascading face detector.
         Then the program determines which model should be used based on the \texttt{featureType} and \textttt{classifierName} variables provided by the user; loads said model; extracts the corresponding features from the faces array (if necessary) and proceeds to predict the labels using the selected model. Once the labels are predicted, a filtering step is applied to remove from the list faces that were predicted to belong to the \textit{non\_faces} artificial label. Finally, the response matrix is assembled to conform to the specified format. Note that, for the feature extraction step, it is necessary to reuse the same featureBag used for training the SURF-based classifiers and the same cell size used for the HOG-based ones.
-    \subsection{Classifier Results}
+    \subsection{Quantitative Results}
         The results, shown in table \ref{table:results}, indicate some clear differences between the feature types and classifiers used. In terms of accuracy, the classifiers performed quite well with most classifiers staying in the 75\%-85\% accuracy range. The best classifier in terms of accuracy was the CNN with ~90\% correct predictions in the test set, but that came at the expense of a considerably longer training time, over 2.5 hours in total.
         \begin{table}[h!]
             \centering
@@ -196,14 +196,46 @@
         \end{table}
 
         The CNN was trained using transfer learning from the pretrained AlexNet, a general purpose object categorization CNN trained with the ImageNet database to recognize over 1000 object categories. It is interesting to note how a CNN trained on a different domain (object instead of face classification) still fared remarkably well when applying simple transfer learning. If the CNN was to be trained from scratch, it would be reasonable to expect better performance given the features captured in the initial convolutions/pooling layers of the CNN would be more relevant to the task at hand. On the other hand, we could also expect the total training time to be orders of magnitude longer.
-        Comparing HOG and SURF based classifiers, the SURF-based ones were one order of magnitude smaller in size and faster to train. The training time becomes less discrepant if we factor in the time necessary to build the feature bag (SURF only) extract the training features, as SURF required ????s while HOG required only ???s for this preprocessing task. Despite being more efficient, the SURF models were, in general, less accurate than the HOG-based ones. It is important to note, however, that one of SURF's most relevant improvements over HOG - being invariant to scale and rotation - has diminished effect in this specific problem set as all faces are in the general upright direction and the cropping+scaling done in preprocessing means that the faces all have similar sizes when being fed into the classifiers.
-        Finally
-\subsection{Tuning}
-\subsection{Model Selection}
+        Comparing HOG and SURF based classifiers, the SURF-based ones were one order of magnitude smaller in size and faster to train. The training time becomes less discrepant if we factor in the time necessary to build the feature bag (SURF only) extract the training features, as SURF required ????s while HOG required only ???s for this preprocessing task. Despite being more efficient, the SURF models were, in general, less accurate than the HOG-based ones. It is important to note, however, that one of SURF's most relevant improvements over HOG - being invariant to scale and rotation - has diminished effect in this specific problem set because a) all faces are in the general upright direction and b) the cropping+scaling done in preprocessing means that the faces all have similar sizes when being fed into the classifiers.
+        Finally, a confusion matrix for the most accurate classifier (CNN) can be seen in image \ref{fig:results:confusion_matrix}, the matrix was color coded according to an sequential scale easier highlight misclassifications.
+
+        \begin{figure}[t]
+            \centering
+            \includegraphics[height=12cm]{./Images/results/confusion_matrix.png}
+            \caption{Confusion Matrix of test set predictions by the CNN classifier}
+            \label{fig:results:confusion_matrix}
+        \end{figure}
+
+    \subsection{Qualitative Results}
+        Observing the confusion matrix shown in image \ref{fig:results:confusion_matrix} and its most common misclassifications yielded some interesting results. Figure \ref{fig:results:confusion_samples} show three pairs ([39 50], [36 37],  [8 79]) that ranked among the most commonly misclassified instances. In all three cases, one can infer the reasons why the classifier may failed to properly distinct between the classes: subjects have similar skin tones, hair color and haircuts and their faces are in similar positions (either front facing or at an angle) inside the cropping box.
+
+        \begin{figure}[t]
+            \centering
+            \includegraphics[height=7cm]{./Images/results/confusion_samples.png}
+            \caption{Examples of images misclassified by the CNN classifier}
+            \label{fig:results:confusion_samples}
+        \end{figure}
+
+        Testing the classifier on a group photo shows how the addition of the \textit{non\_faces} artificial label proved to be useful in refining the classification results. Image \ref{fig:results:non_faces} shows a sample group picture with red annotations indicating false positive face detections (i.e. non facial regions that were deemed as such by the face detection algorithm) and were correctly classified as non faces and, therefore, removed from the returned results matrix P.
+        Finally, image \ref{fig:results:annotated_group} shows the same group photo, this time annotated with the returned predicted labels for each face found. Along the left edge there is a face (belonging to individual labeled 74) that was not detected by the face detection algorithm (false negative), this could be due to the fact the his face is only partially visible, more importantly, his right eye is partially cropped in the photo - eyes are important anchor features in the face detection algorithm used.
+
+        \begin{figure}[h]
+            \centering
+            \includegraphics[height=10cm]{./Images/results/non_faces.png}
+            \caption{Group photo: Highlighted in red are non facial regions picked up by face detection and correctly filtered out by the CNN classifier}
+            \label{fig:results:non_faces}
+        \end{figure}
+
+        \begin{figure}[h]
+            \centering
+            \includegraphics[height=10cm]{./Images/results/annotated_group.png}
+            \caption{Group photo: Labels predicted by CNN classifier annotated in red above individuals' faces}
+            \label{fig:results:annotated_group}
+        \end{figure}
+
 \section{Digit Recognition}
 \subsection{Strategy}
 \subsection{Results}
-\section{Full Program}
 \section{Conclusion}
 \section{reflection}
 \section{Further Work}
