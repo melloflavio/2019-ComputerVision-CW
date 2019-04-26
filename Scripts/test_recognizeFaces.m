@@ -6,18 +6,18 @@
 % imagePath = "../Dataset\test_set\group\individual_pic\IMG_8224.jpg";
 imagePath = "../Dataset\test_set\group\individual_pic\IMG_8241.jpg";
 imgObj = imread(imagePath);
+figure;
+imshow(imgObj);
 
 %% Select CLassifier Type
 % acceptedClassifiers = {'SVM', 'CNN', 'RF', 'NB', 'KNN'};
 % acceptedFeatureTypes = {'SURF', 'HOG'};
-result = RecogniseFace(imgObj, 'HOG', 'NB');
+result = RecogniseFace(imgObj, 'SURF', 'CNN');
 
 %% Show image with circles & labels
 % Draw Circles around every face
 % annotatedImg = insertShape(imgObj, 'circle',[result(:, 2), result(:, 3), ones(size(result, 1), 1)*150], 'LineWidth', 5, 'Color', 'red');
 % imshow(annotatedImg);
-figure;
-imshow(imgObj);
 
 % Add labels to faces
 for i = 1:size(result,1)
