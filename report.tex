@@ -11,8 +11,16 @@
 \usepackage{textgreek}
 \usepackage{graphics}
 \usepackage[shortlabels]{enumitem} % Enum with letters
-\usepackage{makecell}
+\usepackage{makecell} % Table headers with line breaks
 \renewcommand\theadfont{\bfseries\sffamily}
+
+\usepackage{hyperref} % hyperlinks within text body
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
 
 
 
@@ -124,9 +132,6 @@
         \subsubsection{Face Extraction Difficulties}
             The face detection algorithm used leverages the Viola-Jones algorithm with Haar features to detect changes in shade in specific regions of the face, such as eyes, nose and forehead. It is known that this particular type of detection strategy is inherently biased (see http://gendershades.org/), being able to detect lighter skinned faces with considerably better than darker skinned ones. This effect was observed in more evidently in the faces extracted from the group data where one individual had around 20\% instances of her face detected when compared to the rest of the data. It is of the utmost importance to stress how this type seemingly innocent of bias could lead to unwanted biases in other critical applications of computer vision and should be combated, specially considering that face detection often lies at the initial stages of a computer vision based pipeline.
 
-
-% \subsection{File Sorting}
-
 \section{Facial Recognition}
     Once all the preprocessing and labelling is done, the actual image classification task is somewhat simple as there are powerful tools readily available for the task not only in Matlab, but also in other languages/stacks as well. This study focused on 2 visual feature extracting techniques - SURF and HOG - as well as 5 different classification methods - Convolutional Neural Networks (CNN), Naïve Bayes (NB), K-Nearest Neighbours (KNN), Support Vector Machines (SVM), and Random Forests (RF). The four latter methods are classical machine learning classification methods, which were adapted for image classification based on natural language processing techniques such as bag of words - treating the occurrence rate of each individual word in a document as a separate feature. For image classification, "visual" words are used, that is a collection of visual features is extracted from each image, and the occurrence rate of each feature (word) is the feature vector. Both SVMs and RFs then rely on using a graphical feature extracting technique (SURF or HOG in this case) to generate a feature vector based on the occurrence rate of said features in each image, and then feeding said feature vectors, along with their respective labels, to the classifier in order to train it. Predicting a label then requires the user to extract from the new image the occurrence rate of the same visual features, and feeding this into the classifier. CNNs, on the other hand, are different from classical machine learning approaches in that the neural network itself performs both the feature extracting and classification - this is further discussed in section \ref{CNN} below.
 
@@ -166,7 +171,7 @@
         Then the program determines which model should be used based on the \texttt{featureType} and \textttt{classifierName} variables provided by the user; loads said model; extracts the corresponding features from the faces array (if necessary) and proceeds to predict the labels using the selected model. Once the labels are predicted, a filtering step is applied to remove from the list faces that were predicted to belong to the \textit{non\_faces} artificial label. Finally, the response matrix is assembled to conform to the specified format. Note that, for the feature extraction step, it is necessary to reuse the same featureBag used for training the SURF-based classifiers and the same cell size used for the HOG-based ones.
     \subsection{Quantitative Results}
         The results, shown in table \ref{table:results}, indicate some clear differences between the feature types and classifiers used. In terms of accuracy, the classifiers performed quite well with most classifiers staying in the 75\%-85\% accuracy range. The best classifier in terms of accuracy was the CNN with ~90\% correct predictions in the test set, but that came at the expense of a considerably longer training time, over 2.5 hours in total.
-        \begin{table}[h!]
+        \begin{table}[b]
             \centering
             \begin{tabular}{||c c c c c c p{5cm}||}
                 \hline
@@ -233,16 +238,37 @@
             \label{fig:results:annotated_group}
         \end{figure}
 
-\section{Digit Recognition}
-\subsection{Strategy}
-\subsection{Results}
-\section{Conclusion}
-\section{reflection}
-\section{Further Work}
-- TF/IDF
-- rotation leveling
-- Tuning Hyperparameters
-- CNN from scratch
-- SURF/HOG cell sizes & other hyperparams (n clusters in SURF)
+\section{Digit Recognition}\label{sec:digit_ocr}
 
+The second part of the study regards text recognition within natural images. The text in this case was the numbers used for assigning the individuals labels that were used in the facial recognition problem. FOr assigning such labels, the individual pictures and movies were taken while having the person hold a white sheet of paper with the number (i.e. label) printed in black using an unknown typeface. The challenge then lies in recognizing the numbers found in a given picture/video.
+
+\subsection{Strategy}
+    One of the first, higher order, problems found is how to deal with different media types - videos and pictures. The solution to this problem chosen was to reduce both media instances into one by treating videos as a series of static pictures. With this strategy, if a solution is found for finding the labels within pictures, finding them in videos becomes trivialized by simply extracting all the individual frames in the videos, feeding them one by one to the label detection algorithm, and deduplicating the results, consolidating them into a unique set of labels found.
+    Once the problem of media duality is solved, the next logical step is then to determine which technique should be used to properly detect and extract the labels from images. For this purpose, I based my strategy on \href{https://uk.mathworks.com/help/vision/examples/automatically-detect-and-recognize-text-in-natural-images.html}{Matlab's tutorial on finding text in natural images}. This strategy relies on finding MSER candidate regions in the provided image representing individual characters; filtering out poor candidates using a rule based approach; merging, where applicable, the remaining candidates into contiguous regions and finally performing OCR to find the text in each of these regions.
+
+    \subsubsection{Filtering Characteristics}
+        Some examples of characteristics used to filter out poor candidates are aspect ratio ($width / height$) and stroke width width. Print letters/digits usually have a well defined interval of possible aspect ratios, too wide sections are disconsidered. Stroke width variation is a somewhat more complex concept, and required further tuning to properly detect numbers in the typeface used in the experiment. Stroke width is calculated by first converting the color/grayscale image into a binary one. The binary image is used to define a skeleton template, that is a fine line that is equidistant to the region's border. Finally, stroke width (and its variation within the region) is calculated by measuring the distance between the skeleton and the region's borders. This is a useful parameter for filtering out candidates because print typefaces often have limited stroke width variation. However, some tuning had to be made regarding this parameter's threshold as the typeface used did have some variation, especially in the curved digits such as 6 or 5. Figure \ref{fig:ocr:stroke} exemplifies this phenomenon by comparing side by side the same digits in this and the widely used Arial typeface. Notice how, the typeface used in the labels tends to become slimmer in certain regions such as the tip of the 6 or the middle of the curves found in 6 and 5, whereas Arial has the same width across the entire characters. Based on this particularity of the typeface used in the labels, a small change had to be made in the example code to increase the stroke width variation threshold to allowed. This has the effect of increasing the false positive rate (i.e. non text regions that are not filtered out), but this can be further dealt with in the latter stages of the OCR pipeline.
+        \begin{figure}[h]
+            \centering
+            \includegraphics[height=5cm]{./Images/ocr/stroke.png}
+            \caption{Stroke width variation sample. Typeface used in experiment (left) vs Arial (right)}
+            \label{fig:ocr:stroke}
+        \end{figure}
+
+    \subsubsection{Region Merging}
+        Initial tests with the complete pipeline shown cases in which the individual digits that compound the label were being identified as individual words, instead of single number containing both digits. This proved a valuable hint to indicate that the MSER regions for each digit were not being properly merged into a single text block - one possible explanation could be because the tracking/letter-spacing present in the used typeface is larger than usual. To account for this phenomenon I decided to increase expansion factor applied to merge regions from 0.02 to 0.05. This proved to be a positive change as the correct identification rate increased from ??\% to 87\%.
+
+    \subsubsection{OCR}
+        The final stage of the OCR pipeline used in this study is to feed the remaining candidate regions into Matlab's stock OCR function, which allows for various parameters/hints to be set to customize the OCR being applied. Among the available options the two most relevant ones are: \texttt{TextLayout}, which can be used to indicate the expected text format being a single line, a single word or a contiguous block of text; and \texttt{CharacterSet} which can be used to constrain the character set to a specific collection. Considering the labels are formed by a pair of digits, I opted to use the TextLayout:Word hint, which proved useful in eliminating noise returned by the OCR function. The CharacterSet hint, however, proved to have negative results. Restricting the expected character set to the 10 Arabic Numerals effectively introduces bias into the OCR algorithm, which increases the chance of any remaining non-text or textual but not numeric regions to be outputted as numbers. To work around this issue, I opted to take a different approach: instead of constraining the character set to the 10 digits, use only the TextLayout:Word hint and use the knowledge of the problem's constraints to further filter out the text results - keeping texts that are constituted only by numbers and disregarding other textual regions. This proved to have better results - testing against the provided individual data, the final pipeline correctly identified the labels in 87\% of the cases. For the purposes of this test, a successful identification is determined if the label number is found among the returned numbers found by the OCR pipeline. There is still the issue of false positives, which remains to be dealt with.
+
+    \subsubsection{Multiple Numbers}
+        Because of the bottom-up strategy used, the OCR pipeline implemented is able to detect multiple numbers in a single image or video, since each region is independently accepted or filtered out based only on its own characteristics and underlying content.
+
+\section{Conclusion}
+    Reflecting on the results obtained by both the label recognizer and face classifier I consider this experiment to be successful. Over the course of the study several different techniques were applied to resolve specific issues which resulted in an overall reasonably accurate pipeline. It is a often repeated mantra that in the A.I. domain, "more data beats a cleverer algorithm ". That is because the current state of algorithmic solutions, especially neural networks based ones, rely on a vast amount of data to be able to properly generalize. On this context, I attribute the success of the facial recognition classifiers trained mostly to the large amount of data I was able to label, especially using the clustering technique described in section \ref{sec:face_labeling:clustering}. Although it still required a reasonably large amount of manual input to label the images, it proved to be a significant improvement over manually labeling the images one by one. Still in the realm of labeling, if the initial labeling of the individual photos were to be more time consuming (e.g. having more labels and/or pictures; files not being grouped by label) a reasonable alternative could be to leverage the digit detection pipeline developed in section \ref{sec:digit_ocr} to automatically assign labels, in which case, however, the high false digit detection rate would prove to be problematic. A possible solution to that could be to leverage machine learning algorithms to further filter textual region candidates based on their parameter values instead of relying only on a simplistic rules-based approach. Finally, it was interesting to observe the variability in terms training time and model size between the different algorithms and feature descriptors.
+    Regarding future work, a vast horizon remains to be explored. One could study the differences found in models based on different data subsets (e.g. models trained on individual pictures prediction faces extract from group shot. Alternatively, models trained on faces extracted from the group data predicting faces from individual shots), in fact, the entire preprocessing pipeline was structured to allow for this differentiation, keeping the sources separated into subfolders, however, this particular comparison was removed from the final experiment due to time constraints. There is also definitely space for further tuning the hyperparameters of the experiment, both in terms of feature descriptor (e.g. SURF/HOG cell size) as well as classifier model (e.g. number of trees in RF, kernel used in SVM, etc). In the CNN realm, one could look into the differences found by comparing models based on 1) transfer learning from another domain (e.g. AlexNet - general object classification), 2) transfer learning from the same domain (e.g. VGG-Faces - facial recognition trained on a different set of people), and 3) a CNN trained from scratch for this particular purpose. There is also much room for improvement in the preprocessing pipeline, for example rotating the image so that both eyes are leveled in every image cropped. And, finally, one could further explore the analogy of the visual bag of words with other Natural Language Processing (NLP) techniques such as Term Frequency/Inverse Document Frequency (TF/IDF) as these techniques could prove to be useful in the image classification realm as much as they are in the textual one.
+
+\section{References}
+- (see http://gendershades.org/)
+https://uk.mathworks.com/help/vision/examples/automatically-detect-and-recognize-text-in-natural-images.html
 \end{document}
