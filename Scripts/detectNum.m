@@ -12,19 +12,12 @@ function [detectedNumbers] = detectNum(filename)
         %   Iterate over all frames in video, detecting all the numbers in
         %   each frame, accumulating all detected numbers in an array &
         %   shrinking array to store only unique numbers found
-        frameIdx = 0;
         while(hasFrame(videoObj))
-            disp(frameIdx);
-%             if (frameIdx > 55)
-%                 figure;
-%                 imshow(currentFrame);
-%             end
             currentFrame = readFrame(videoObj); % Read frame
             frameNumbers = ExtractNumbersFromFrame(currentFrame); % Detect numbers
 
             detectedNumbers = [detectedNumbers, frameNumbers]; % Accumulate 
-            detectedNumbers = unique(detectedNumbers); % Shrink
-            frameIdx = frameIdx +1;
+            detectedNumbers = unique(detectedNumbers); % Shrink keeping uniques only
         end
     else
         error("Media type not supported. Supported extensions are: .jpg, .jpeg, .mp4");

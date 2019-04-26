@@ -2,6 +2,7 @@ function [foundNumbers] = ExtractNumbersFromFrame(colorImage)
 %EXTRACTNUMBERFROMFRAME Extracts numbers found in a natural image
 %   Supplied image must be color
 
+foundNumbers = []; % Initialize output
 
 % Wrap detection around try/catch to ensure any error is skipped rather
 % than breaking execution. Unfortunately, there seems to be an error whener
@@ -151,12 +152,12 @@ try
     %% Step 6 - Filter OCR results based on known constraints
 
     % At this stage we should have a reasonable accuracy in terms of finding 
-    % candidate text regions found being able to extract text from them via
+    % candidate text regions and being able to extract text from them via
     % OCR. With the exception of some tuning in the stroke width variation, the
     % previous steps represent a general-use approach to extracting text from
     % natural images. This final stage in the process represents a final tuning
-    % based on known constraints of the task at hand. That is, the text should
-    % be a single integer number
+    % based on known constraints of the task at hand. That is, that the text 
+    % should be a single integer number
 
     foundNumbersIdxs = [];
     foundNumbers = [];
@@ -201,7 +202,6 @@ try
     end
 catch err
     warning(err.message); % Repackage error as warning
-    foundNumbers = []; % Ensure output is set
 end
 
 end
