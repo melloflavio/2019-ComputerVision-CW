@@ -10,7 +10,7 @@ testFeatures = ExtractHogFeatures(testImgDs, hogCellSize);
 %% Naive Bayes -  NB
 disp("Training NB...");
 tic;
-hogNb = fitcnb(trainFeatures, trainImgDs.Labels, 'DistributionNames', 'kernel');
+hogNb = fitcnb(trainFeatures, trainImgDs.Labels);
 execTime = toc;
 fprintf("Trained in %f seconds...\n", execTime);
 

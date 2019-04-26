@@ -1,5 +1,5 @@
 %% Constant definitions
-inputBasepath = "../Dataset\processed_6";
+inputBasepath = "../Dataset\processed_5_half";
 
 %% Create Normalized Image Set Collection with ann individuals pictures
 % imgSetCollection = CreateNormalizedImageSetCollection(inputBasepath);
@@ -16,4 +16,4 @@ imgDatastore = splitEachLabel(imgDatastore, minimumSetCount, 'randomized');
 
 [trainImgDs, testImgDs] = splitEachLabel(imgDatastore, 0.85);
 
-save("datasets", "trainImgDs", "testImgDs");
+%save("datasets", "trainImgDs", "testImgDs");
