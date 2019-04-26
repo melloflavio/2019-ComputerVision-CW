@@ -179,7 +179,8 @@ try
             for ocrDigitIdx = 1:size(ocrNums, 2)
                 ocrDigit = ocrNums(ocrDigitIdx);
                 isInteger = mod(ocrDigit, 1) == 0;
-                if (isInteger) % Checks if is integer using remainder of division by 1
+                isPositive = ocrDigit >= 0;
+                if (isInteger && isPositive) % Checks if is integer using remainder of division by 1
                     % Shift accumulated number to the left
                     orderOfMagnitude = round(ocrDigit / 10);
                     numberValue = numberValue * (10 * orderOfMagnitude);

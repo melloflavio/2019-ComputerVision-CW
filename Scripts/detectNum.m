@@ -7,7 +7,7 @@ function [detectedNumbers] = detectNum(filename)
     if (strcmp(extension, ".jpg") || strcmp(extension, ".jpeg")) % Picture
         colorImage = imread(filename); % Read image
         detectedNumbers = ExtractNumbersFromFrame(colorImage); % Detect numbers
-    elseif (strcmp(extension, ".mp4")) % Movie
+    elseif (strcmp(extension, ".mp4")|| strcmp(extension, ".mov")) % Movie
         videoObj = VideoReader(filename); 
         %   Iterate over all frames in video, detecting all the numbers in
         %   each frame, accumulating all detected numbers in an array &
@@ -20,7 +20,7 @@ function [detectedNumbers] = detectNum(filename)
             detectedNumbers = unique(detectedNumbers); % Shrink keeping uniques only
         end
     else
-        error("Media type not supported. Supported extensions are: .jpg, .jpeg, .mp4");
+        error("Media type not supported. Supported extensions are: .jpg, .jpeg, .mp4, .mov");
     end
 end
 
