@@ -10,17 +10,27 @@ foundNumbers = []; % Initialize output
 % matlab that single element arrays are "automagically" converted to plain
 % elements, thus losing some of the indexing capabilities.
 try
+    %% Step 1 Detect MSER regions.
     I = rgb2gray(colorImage); % Convert to grayscale
-
-    % Detect MSER regions.
+    I = imerode(I, ones(4,4)); % Erode image to make stroke wider
+    
+    imageArea = prod(size(I));
+    minimumArea = round(imageArea*0.0002);
+    maximumArea = round(imageArea*0.002);
     [mserRegions, mserConnComp] = detectMSERFeatures(I, ... 
-        'RegionAreaRange',[100 9000], ...
-        'ThresholdDelta',4);
+        'RegionAreaRange',[minimumArea maximumArea], ...
+        'ThresholdDelta',4 ...
+    );
     %% Step 2
     % Use regionprops to measure MSER properties
     mserStats = regionprops(mserConnComp, 'BoundingBox', 'Eccentricity', ...
         'Solidity', 'Extent', 'Euler', 'Image');
-
+    
+    % If no regions were found, return prematurely
+    if(isempty(mserStats))
+        foundNumbers = []; % Ensure output exists
+        return
+    end
     % Compute the aspect ratio for all regions using bounding box data.
     bbox = vertcat(mserStats.BoundingBox);
     w = bbox(:,3);
@@ -39,6 +49,11 @@ try
     mserStats(filterIdx) = [];
     mserRegions(filterIdx) = [];
     
+    % If all regions have been removed, return prematurely
+    if(isempty(mserStats))
+        foundNumbers = []; % Ensure output exists
+        return
+    end
 
     %% Step 3 - Filter region list based on stroke width variation
     % In general, letters/digits then to have uniform stroke width. This is
@@ -51,7 +66,7 @@ try
     % little higher than the default because the font used for printing the
     % numbers has some variation in stroke width in the curves.
     strokeWidthThreshold = 0.6; 
-
+    strokeWidthFilterIdx = logical(zeros(numel(mserStats)));
     % Process each region, filtering regions in which the stroke with variation
     % is larger than an established threshold
     for j = 1:numel(mserStats)
@@ -79,7 +94,12 @@ try
     mserRegions(strokeWidthFilterIdx) = [];
     mserStats(strokeWidthFilterIdx) = [];
 
-
+    % If all regions have been removed, return prematurely
+    if(isempty(mserStats))
+        foundNumbers = []; % Ensure output exists
+        return
+    end
+    
     %% Step 4 - Merge bounding boxes to find contiguous text regions
 
     % Get bounding boxes for all the regions
@@ -163,45 +183,51 @@ try
     foundNumbers = [];
     for ocrIdx = 1:size(ocrtxt, 1)
         ocrElem = ocrtxt(ocrIdx);
-        ocrTxt = ocrElem.Text;
-        ocrTxt = strtrim(ocrTxt); % Trim whitespace
-        [ocrNums, success] = str2num(ocrTxt); % Convert to number array
+        
+        %  Consider only elements with word confidence above 70%
+        if(all(ocrElem.WordConfidences > 0.80))
+        
+            ocrTxt = ocrElem.Text;
+            ocrTxt = strtrim(ocrTxt); % Trim whitespace
+            [ocrNums, success] = str2num(ocrTxt); % Convert to number array
 
-        % Even if string parse to number was successful, multiple errors may
-        % still happen. The parsed values might not be integers at al, as 
-        % matlab does not have parse to int, only parse to number :(. Also, OCR
-        % may introduce whitespace between chars or digits, in this case, we 
-        % check if array size is larger than 1 and rebuild a single number from 
-        % the individual digits
-        if (success)
-            isInteger = true;
-            numberValue = 0;
-            for ocrDigitIdx = 1:size(ocrNums, 2)
-                ocrDigit = ocrNums(ocrDigitIdx);
-                isInteger = mod(ocrDigit, 1) == 0;
-                isPositive = ocrDigit >= 0;
-                if (isInteger && isPositive) % Checks if is integer using remainder of division by 1
-                    % Shift accumulated number to the left
-                    orderOfMagnitude = round(ocrDigit / 10);
-                    numberValue = numberValue * (10 * orderOfMagnitude);
+            % Even if string parse to number was successful, multiple errors may
+            % still happen. The parsed values might not be integers at al, as 
+            % matlab does not have parse to int, only parse to number :(. Also, OCR
+            % may introduce whitespace between chars or digits, in this case, we 
+            % check if array size is larger than 1 and rebuild a single number from 
+            % the individual digits
+            if (success)
+                isInteger = true;
+                numberValue = 0;
+                for ocrDigitIdx = 1:size(ocrNums, 2)
+                    ocrDigit = ocrNums(ocrDigitIdx);
+                    isInteger = mod(ocrDigit, 1) == 0;
+                    isPositive = ocrDigit >= 0;
+                    if (isInteger && isPositive) % Checks if is integer using remainder of division by 1
+                        % Shift accumulated number to the left
+                        orderOfMagnitude = round(ocrDigit / 10);
+                        numberValue = numberValue * (10 * orderOfMagnitude);
 
-                    % Introduces text at least significant places
-                    numberValue = numberValue + ocrDigit; 
-                else % Non integer digit found, consider this number as incorrect or "noise"
-                    break;
+                        % Introduces text at least significant places
+                        numberValue = numberValue + ocrDigit; 
+                    else % Non integer digit found, consider this number as incorrect or "noise"
+                        break;
+                    end
                 end
-            end
 
-            % If number is valid, consider it as a found candidate, store in
-            % found numbers list alog with index to map to original OCR
-            % bounding boxes, if desired
-            if (isInteger)
-                foundNumbersIdxs = [foundNumbersIdxs, ocrIdx];
-                foundNumbers = [foundNumbers, numberValue];
+                % If number is valid, consider it as a found candidate, store in
+                % found numbers list alog with index to map to original OCR
+                % bounding boxes, if desired
+                if (isInteger)
+                    foundNumbersIdxs = [foundNumbersIdxs, ocrIdx];
+                    foundNumbers = [foundNumbers, numberValue];
+                end
             end
         end
     end
 catch err
+    foundNumbers = []; % Ensure output exists
     warning(err.message); % Repackage error as warning
 end
 
