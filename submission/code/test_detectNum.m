@@ -1,7 +1,5 @@
-inputBasepath = "../Dataset\test_set_numbers";
-% inputBasepath = "../Dataset\test_set_numbers\81_2";
+inputBasepath = "../Dataset\test_set_numbers\";
 
-% testDatastore = imageDatastore(inputBasepath, 'IncludeSubfolders', true, 'LabelSource','foldernames');
 %% Generate Datastore
 testDatastore = datastore(inputBasepath, 'IncludeSubfolders', true, 'LabelSource','foldernames', 'Type', 'image', 'FileExtensions', {'.jpg', '.jpeg','.mov','.mp4'});
 
@@ -10,16 +8,11 @@ minimumSetCount = min(labelsTable.Count); % determine the smallest amount of ima
 % Use splitEachLabel method to trim the set to smallest amount
 testDatastore = splitEachLabel(testDatastore, minimumSetCount, 'randomized');
 
-%% Split Data into Train/Test - 85/15 ratio
-
-%Take only 30% of the data to test for performance
-% [reducedDatastore, ~] = splitEachLabel(testDatastore, 0.50);
-reducedDatastore = testDatastore;
-
-numFiles = size(reducedDatastore.Labels, 1);
+numFiles = size(testDatastore.Labels, 1);
 %% Run the detection algorithm on all files and calculate performance
-correctDetection = logical(zeros(size(reducedDatastore.Labels))); % Instances in which the correct label is returned among the list
-falseDetection = zeros(size(reducedDatastore.Labels)); % Total number of labels that were incorrectly returned from the list
+correctDetection = logical(zeros(size(testDatastore.Labels))); % Instances in which the correct label is returned among the list
+falseDetection = zeros(size(testDatastore.Labels)); % Total number of labels that were incorrectly returned from the list
+totalDetection = zeros(size(testDatastore.Labels)); % Total number of labels that were incorrectly returned from the list
 
 for i = 1:numFiles
     % Detect Numbers
@@ -31,9 +24,11 @@ for i = 1:numFiles
     detectedNumbers = categorical(detectedNumbers);
     
     correctDetection(i) = any(ismember(testDatastore.Labels(i),detectedNumbers));
-    falseDetection(i) = size(detectedNumbers, 1) - correctDetection(i);
-    fprintf("predicted: %s - label: %s - result: %s\n", strjoin(string(detectedNumbers), " "), testDatastore.Labels(i), string(correctDetection(i)));
+    fprintf("predicted: %s - label: %s - result: %s-%d\n", strjoin(string(detectedNumbers), " "), testDatastore.Labels(i), string(correctDetection(i)), size(detectedNumbers, 2));
+    falseDetection(i) = size(detectedNumbers, 2) - correctDetection(i);
+    totalDetection(i) = size(detectedNumbers, 2);
+%     fprintf("predicted: %s - label: %s - result: %s-%d\n", strjoin(string(detectedNumbers), " "), testDatastore.Labels(i), string(correctDetection(i)), falseDetection(i));
 end
 
 performance = sum(correctDetection)/numFiles;
-falseDetectionRate = sum(falseDetection)/numFiles;
+falseDetectionRate = sum(falseDetection)/sum(totalDetection);

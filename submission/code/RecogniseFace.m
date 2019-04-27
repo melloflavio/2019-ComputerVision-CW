@@ -112,22 +112,14 @@ function [P] = RecogniseFace(I, featureType, classifierName)
         end       
     %% Filter out faces detected as 'non face' from the results array
         non_faces = faceOwners == categorical({'non_faces'});
-%         faceOwners = faceOwners(~non_faces);
-% 
-%         faces_x = faceCentres(:, 1);
-%         faces_y = faceCentres(:, 2);
-%         
-%         faces_x = faces_x(~non_faces);
-%         faces_y = faces_y(~non_faces); 
-
-        faceOwners(non_faces) = categorical({'-1'});
-        faceOwners = faceOwners(non_faces);
+        faceOwners = faceOwners(~non_faces);
 
         faces_x = faceCentres(:, 1);
         faces_y = faceCentres(:, 2);
         
-        faces_x = faces_x(non_faces);
-        faces_y = faces_y(non_faces); 
+        faces_x = faces_x(~non_faces);
+        faces_y = faces_y(~non_faces); 
+
         
     %% Assemble Face Matrix
         % Convert face owners from categorical label to numerical value
