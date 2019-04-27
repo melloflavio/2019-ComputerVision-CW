@@ -169,7 +169,6 @@
     \subsection{Training Process}
         \subsubsection{Data Partitioning}
             As mentioned in section \ref{sec:face_labeling:outliers}, there are some discrepancies in the amount of data available for each individual. To ensure no bias is introduced in terms of data distribution, I opted to trim the dataset, forcing all classes to equally distributed in the dataset used. After said trimming process, the resulting balanced data is split into train and test sets according to a 85/15 ratio while keeping both subsets balanced as well. In both the trimming and train/test split, data is selected randomly from each label pool to be a part of the new dataset by use of the \texttt{'randomized'} flag in the \texttt{splitEachLabel} function.
-
         \subsubsection{Conventional Classifiers}
             For the conventional classifiers used (NB, KNN, SVM and RF), the training process is broken down into 2 steps. Feature extraction and training. Feature extraction entails in using either feature descriptor (SURF or HOG) to transform the raw images into a bag of features, which is then ready to be fed into the classifiers along with the image labels.
         \subsubsection*{HOG}
@@ -181,9 +180,7 @@
     \subsection{Prediction Process}
         The prediction process is somewhat straightforward. Given an image, the program leverages the same functions used in the preprocessing pipeline to detect, crop and scale the faces, resulting in two arrays: One containing the 227x227x3 images of the extracted faces, and another containing the X and Y points indicating the centre of the facial respective facial regions detected. Centre is calculated as the centrepoint of the rectangular bounding box detected by the cascading face detector.
         Then the program determines which model should be used based on the \texttt{featureType} and \texttt{classifierName} variables provided by the user; loads said model; extracts the corresponding features from the faces array (if necessary) and proceeds to predict the labels using the selected model. Once the labels are predicted, a filtering step is applied to remove from the list faces that were predicted to belong to the \textit{non\_faces} artificial label. Finally, the response matrix is assembled to conform to the specified format. Note that, for the feature extraction step, it is necessary to reuse the same featureBag used for training the SURF-based classifiers and the same cell size used for the HOG-based ones.
-    \subsection{Quantitative Results}
-        The results, shown in table \ref{table:results}, indicate some clear differences between the feature types and classifiers used. In terms of accuracy, the classifiers performed quite well with most classifiers staying in the 75\%-85\% accuracy range. The best classifier in terms of accuracy was the CNN with ~90\% correct predictions in the test set, but that came at the expense of a considerably longer training time, over 2.5 hours in total.
-        \begin{table}[t]
+        \begin{table}[!h]
             \centering
             \begin{tabular}{||c c c c c c p{5cm}||}
                 \hline
@@ -211,12 +208,13 @@
             \caption{Facial Recognition Results by Feature and Classifier Type}
             \label{table:results}
         \end{table}
-
+    \subsection{Quantitative Results}
+        The results, shown in table \ref{table:results}, indicate some clear differences between the feature types and classifiers used. In terms of accuracy, the classifiers performed quite well with most classifiers staying in the 75\%-85\% accuracy range. The best classifier in terms of accuracy was the CNN with ~90\% correct predictions in the test set, but that came at the expense of a considerably longer training time, over 2.5 hours in total.
         The CNN was trained using transfer learning from the pretrained AlexNet, a general purpose object categorization CNN trained with the ImageNet database to recognize over 1000 object categories. It is interesting to note how a CNN trained on a different domain (object instead of face classification) still fared remarkably well when applying simple transfer learning. If the CNN was to be trained from scratch, it would be reasonable to expect better performance given the features captured in the initial convolutions/pooling layers of the CNN would be more relevant to the task at hand. On the other hand, we could also expect the total training time to be orders of magnitude longer.
         Comparing HOG and SURF based classifiers, the SURF-based ones were one order of magnitude smaller in size and faster to train. The training time becomes less discrepant if we factor in the time necessary to build the feature bag (SURF only) extract the training features, as SURF required ????s while HOG required only ???s for this preprocessing task. Despite being more efficient, the SURF models were, in general, less accurate than the HOG-based ones. It is important to note, however, that one of SURF's most relevant improvements over HOG - being invariant to scale and rotation - has diminished effect in this specific problem set because a) all faces are in the general upright direction and b) the cropping+scaling done in preprocessing means that the faces all have similar sizes when being fed into the classifiers.
         Finally, a confusion matrix for the most accurate classifier (CNN) can be seen in image \ref{fig:results:confusion_matrix}, the matrix was color coded according to an sequential scale easier highlight misclassifications.
 
-        \begin{figure}[t]
+        \begin{figure}[!h]
             \centering
             \includegraphics[height=12cm]{./Images/results/confusion_matrix.png}
             \caption{Confusion Matrix of test set predictions by the CNN classifier. Rows and columns represent the true and predicted classes, respectively.}
@@ -226,7 +224,7 @@
     \subsection{Qualitative Results}
         Observing the confusion matrix shown in image \ref{fig:results:confusion_matrix} and its most common misclassifications yielded some interesting results. Figure \ref{fig:results:confusion_samples} show three pairs ([39 50], [36 37],  [8 79]) that ranked among the most commonly misclassified instances. In all three cases, one can infer the reasons why the classifier may failed to properly distinct between the classes: subjects have similar skin tones, hair color and haircuts and their faces are in similar positions (either front facing or at an angle) inside the cropping box.
 
-        \begin{figure}[t]
+        \begin{figure}[h]
             \centering
             \includegraphics[height=7cm]{./Images/results/confusion_samples.png}
             \caption{Examples of images misclassified by the CNN classifier}
@@ -236,14 +234,14 @@
         Testing the classifier on a group photo shows how the addition of the \textit{non\_faces} artificial label proved to be useful in refining the classification results. Image \ref{fig:results:non_faces} shows a sample group picture with red annotations indicating false positive face detections (i.e. non facial regions that were deemed as such by the face detection algorithm) and were correctly classified as non faces and, therefore, removed from the returned results matrix P.
         Finally, image \ref{fig:results:annotated_group} shows the same group photo, this time annotated with the returned predicted labels for each face found. Along the left edge there is a face (belonging to individual labeled 74) that was not detected by the face detection algorithm (false negative), this could be due to the fact the his face is only partially visible, more importantly, his right eye is partially cropped in the photo - eyes are important anchor features in the face detection algorithm used.
 
-        \begin{figure}[h]
+        \begin{figure}[p]
             \centering
             \includegraphics[height=10cm]{./Images/results/non_faces.png}
             \caption{Group photo: Highlighted in red are non facial regions picked up by face detection and correctly filtered out by the CNN classifier}
             \label{fig:results:non_faces}
         \end{figure}
 
-        \begin{figure}[h]
+        \begin{figure}[p]
             \centering
             \includegraphics[height=10cm]{./Images/results/annotated_group.png}
             \caption{Group photo: Labels predicted by CNN classifier annotated in red above individuals' faces}
