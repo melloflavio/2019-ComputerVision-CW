@@ -183,7 +183,7 @@
         Then the program determines which model should be used based on the \texttt{featureType} and \texttt{classifierName} variables provided by the user; loads said model; extracts the corresponding features from the faces array (if necessary) and proceeds to predict the labels using the selected model. Once the labels are predicted, a filtering step is applied to remove from the list faces that were predicted to belong to the \textit{non\_faces} artificial label. Finally, the response matrix is assembled to conform to the specified format. Note that, for the feature extraction step, it is necessary to reuse the same featureBag used for training the SURF-based classifiers and the same cell size used for the HOG-based ones.
     \subsection{Quantitative Results}
         The results, shown in table \ref{table:results}, indicate some clear differences between the feature types and classifiers used. In terms of accuracy, the classifiers performed quite well with most classifiers staying in the 75\%-85\% accuracy range. The best classifier in terms of accuracy was the CNN with ~90\% correct predictions in the test set, but that came at the expense of a considerably longer training time, over 2.5 hours in total.
-        \begin{table}[b]
+        \begin{table}[t]
             \centering
             \begin{tabular}{||c c c c c c p{5cm}||}
                 \hline
@@ -219,7 +219,7 @@
         \begin{figure}[t]
             \centering
             \includegraphics[height=12cm]{./Images/results/confusion_matrix.png}
-            \caption{Confusion Matrix of test set predictions by the CNN classifier}
+            \caption{Confusion Matrix of test set predictions by the CNN classifier. Rows and columns represent the true and predicted classes, respectively.}
             \label{fig:results:confusion_matrix}
         \end{figure}
 
