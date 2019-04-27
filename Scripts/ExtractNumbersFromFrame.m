@@ -14,9 +14,8 @@ try
 
     % Detect MSER regions.
     [mserRegions, mserConnComp] = detectMSERFeatures(I, ... 
-        'RegionAreaRange',[200 8000], ...
+        'RegionAreaRange',[100 9000], ...
         'ThresholdDelta',4);
-
     %% Step 2
     % Use regionprops to measure MSER properties
     mserStats = regionprops(mserConnComp, 'BoundingBox', 'Eccentricity', ...
@@ -39,6 +38,7 @@ try
     % Remove regions flagged by thresholds above
     mserStats(filterIdx) = [];
     mserRegions(filterIdx) = [];
+    
 
     %% Step 3 - Filter region list based on stroke width variation
     % In general, letters/digits then to have uniform stroke width. This is
@@ -93,7 +93,7 @@ try
     ymax = ymin + bboxes(:,4) - 1;
 
     % Expand the bounding boxes by a small amount.
-    expansionAmount = 0.02;
+    expansionAmount = 0.05;
     xmin = (1-expansionAmount) * xmin;
     ymin = (1-expansionAmount) * ymin;
     xmax = (1+expansionAmount) * xmax;
@@ -205,5 +205,6 @@ catch err
     warning(err.message); % Repackage error as warning
 end
 
+% [foundNumbers]
 end
 
