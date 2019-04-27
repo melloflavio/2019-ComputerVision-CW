@@ -24,7 +24,7 @@
 
 - `RecognizeFace.m`: Function that detects and predicts labels according to multiple previously trained classifiers.
 - `detectNum.m`: Function that detects numerical labels in the media file passed as parameter.
-- ExtractNumbersFromFrame.m: Function that performs the actual number detection within a given image. `detectNum.m` acts more as a wrapper for control flow.
+- `ExtractNumbersFromFrame.m`: Function that performs the actual number detection within a given image. `detectNum.m` acts more as a wrapper for control flow.
 - `test_recognizeFace.m`: Script used for testing `RecognizeFace.m`. Can be used as reference material.
 - `test_detectNum.m`: Script used for testing `detectNum.m`. Can be used as reference material.
 - `./scripts/`: Folder containing scripts and functions used both for running the assigned tasks and for the preprocessing pipeline.
