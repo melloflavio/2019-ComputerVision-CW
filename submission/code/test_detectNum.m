@@ -1,4 +1,4 @@
-inputBasepath = "../Dataset\test_set_numbers\";
+inputBasepath = "../../Dataset\test_set_numbers\";
 
 %% Generate Datastore
 testDatastore = datastore(inputBasepath, 'IncludeSubfolders', true, 'LabelSource','foldernames', 'Type', 'image', 'FileExtensions', {'.jpg', '.jpeg','.mov','.mp4'});
